@@ -30,9 +30,10 @@ for(i,imagePath) in enumerate(imagePaths):
 	encodings = face_recognition.face_encodings(image,boxes)
 	for encoding in encodings :
 		knownNames.append(name)
-		knownEncodings.append(encodings)
+		knownEncodings.append(encoding)
 
 data = {"encodings":knownEncodings,"names":knownNames}
+print("+ Total Encodings : ",len(knownEncodings))
 print("+ Dumping encodings")
 f = open(encodings_path,"wb")
 f.write(pickle.dumps(data))
