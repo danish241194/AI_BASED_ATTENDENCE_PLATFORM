@@ -2,6 +2,8 @@ import argparse
 from flask import Flask,request,jsonify
 import json
 import requests
+import threading 
+import time
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
@@ -17,6 +19,7 @@ def schedule_service():
 	}
 
     """
+
     return {"Response":"OK/ERROR"}
 
 
@@ -134,6 +137,13 @@ def schedule_service():
     return OUTPUT
 
 
+def data_dumping_service():
+	while True:
+		time.sleep(60) #wait for 1 minute then upload data in registry
+		data = {"institue":institue_data,"corporate":"corporate_data"}
+		res = requests.post('http://'+REGISTRY_IP+':'+str(REGISTRY_PORT)+'/store/query_manager', json=data)
+
+
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
@@ -141,7 +151,14 @@ if __name__ == "__main__":
 	ap.add_argument("-i","--registry_port",required=True)
 	args = vars(ap.parse_args())       
 	
+	"""
 	REGISTRY_IP = args["registry_ip"]
 	REGISTRY_PORT = args["registry_port"]
-	
+
+	res = requests.get('http://'+REGISTRY_IP+':'+str(REGISTRY_PORT)+'/fetch/query_manager')
+	data = res.json()
+	//inititalize you data
+	t1 = threading.Thread(target=data_dumping_service) 
+	t1.start()
+	"""
 	app.run(debug=True,port=int(args["port"])) 
