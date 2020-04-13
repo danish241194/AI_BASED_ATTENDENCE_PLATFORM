@@ -3,6 +3,8 @@ from flask import Flask,request,jsonify
 import json
 import requests
 
+REGISTRY_IP = None
+REGISTRY_PORT = None
 @app.route('/institue/add_attendence', methods=['GET', 'POST'])
 def schedule_service():
     content = request.json
@@ -135,5 +137,11 @@ def schedule_service():
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
+	ap.add_argument("-i","--registry_ip",required=True)
+	ap.add_argument("-i","--registry_port",required=True)
 	args = vars(ap.parse_args())       
+	
+	REGISTRY_IP = args["registry_ip"]
+	REGISTRY_PORT = args["registry_port"]
+	
 	app.run(debug=True,port=int(args["port"])) 
