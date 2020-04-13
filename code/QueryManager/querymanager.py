@@ -8,7 +8,7 @@ import time
 REGISTRY_IP = None
 REGISTRY_PORT = None
 @app.route('/institue/add_attendence', methods=['GET', 'POST'])
-def schedule_service():
+def add_attendence():
     content = request.json
     """
     content
@@ -17,14 +17,13 @@ def schedule_service():
 		"course":cs123,
 		"present":[roll_no_1,roll_no_2,...]
 	}
-
     """
 
     return {"Response":"OK/ERROR"}
 
 
 @app.route('/institue/get_attendence', methods=['GET', 'POST'])
-def schedule_service():
+def get_attendence():
     content = request.json
     """
 	input content
@@ -76,7 +75,7 @@ def schedule_service():
 
 
 @app.route('/corporate/add_attendence', methods=['GET', 'POST'])
-def schedule_service():
+def add_attendence_corporate():
     content = request.json
     """
     content
@@ -92,7 +91,7 @@ def schedule_service():
 
 
 @app.route('/corporate/get_attendence', methods=['GET', 'POST'])
-def schedule_service():
+def get_attendence_corporate():
     content = request.json
     """
     input content

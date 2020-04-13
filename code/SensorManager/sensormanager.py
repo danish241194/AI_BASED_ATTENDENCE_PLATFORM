@@ -8,7 +8,7 @@ import time
 REGISTRY_IP = None
 REGISTRY_PORT = None
 @app.route('/institue/add_camera', methods=['GET', 'POST'])
-def schedule_service():
+def add_camera():
     content = request.json
     """
     content
@@ -39,7 +39,7 @@ def schedule_service():
 
 
 @app.route('/institue/get_camera_instance', methods=['GET', 'POST'])
-def schedule_service():
+def get_camera_instance():
     content = request.json
     """
     input
@@ -68,7 +68,7 @@ def data_fetching(topic):
 			put latest image for this topic in the kafka topic(unique id) 
 		"""
 @app.route('/institue/start_fetching', methods=['GET', 'POST'])
-def schedule_service():
+def start_fetching():
     content = request.json
     """
     input
@@ -91,7 +91,7 @@ def schedule_service():
     return OUTPUT
 
 @app.route('/upload_image/<unique_id>', methods=['GET', 'POST'])
-def schedule_service(unique_id):
+def upload_image(unique_id):
     content = request.json
     """
     content input
@@ -109,7 +109,7 @@ def schedule_service(unique_id):
 
 
 @app.route('/corporate/add_camera', methods=['GET', 'POST'])
-def schedule_service():
+def add_camera_corporate():
     content = request.json
     """
     content
@@ -148,13 +148,13 @@ def data_fetching_corporate(type,corporate_id,unique_id):
 			else:
 				in corporate_id_out topic
 		"""
-@app.route('/institue/start_fetching', methods=['GET', 'POST'])
-def schedule_service():
+@app.route('/corporate/start_fetching', methods=['GET', 'POST'])
+def start_fetching_corporate():
     content = request.json
     """
     input
     {
-    	"institue_id":"ins_id"
+    	"corporate_id":"ins_id"
     	"unique_id":"unique_id"
     }
     """
@@ -170,7 +170,7 @@ def schedule_service():
 
     """
     return OUTPUT
-    
+
 def data_dumping_service():
 	while True:
 		time.sleep(60) #wait for 1 minute then upload data in registry
