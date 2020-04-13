@@ -19,18 +19,70 @@ def store(service):
     return {"Response":"OK/ERROR"}
 
 
-@app.route('/fetch/<service>', methods=['GET', 'POST'])
+@app.route('/fetch/<service>')
 def fetch(service):
     content = request.json
-    """
-    content
-	{
-		
-		"data":{json}
-	}
-    """
+    '''
+    return data what ever was latest stored by the service
+    '''
+
+    return data
+
+@app.route('/add_machine')
+def add_machine():
+    content = request.json
+    '''
+    	{
+			machines:[
+				machine_1:{
+							"ip":ip,
+							"port":port
+							"username":username,
+							"password":password
+						},
+				machine_2:{
+							"ip":ip,
+							"port":port,
+							"username":username,
+							"password":password
+					}
+				]
+    	}
+    '''
+    '''
+    add this in free list
+    '''
+    '''
+    	return ack
+    '''
 
     return {"Response":"OK/ERROR"}
+
+@app.route('/get_free_list')
+def get_free_list():
+    content = request.json
+    
+    '''
+    	free_list = [{"ip":ip,"port":port"username":username,"password":password},
+					{"ip":ip,"port":port"username":username,"password":password}
+    				]
+    '''
+
+    return {"res":"OK","free_list":free_list} or {"res":"NO_MACHINE_AVAILABLE"}
+
+
+@app.route('/remove_from_free_list')
+def get_free_list():
+    content = request.json
+    
+    '''
+    	remove first machine from free_list
+    '''
+
+    return {"response":"OK"}
+
+
+
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
