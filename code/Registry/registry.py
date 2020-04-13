@@ -21,14 +21,13 @@ def store(service):
 
 @app.route('/fetch/<service>')
 def fetch(service):
-    content = request.json
     '''
     return data what ever was latest stored by the service
     '''
 
     return data
 
-@app.route('/add_machine')
+@app.route('/add_machine', methods=['GET', 'POST'])
 def add_machine():
     content = request.json
     '''
@@ -57,6 +56,41 @@ def add_machine():
     '''
 
     return {"Response":"OK/ERROR"}
+
+
+ @app.route('/service_entry', methods=['GET', 'POST'])
+def service_entry():
+    content = request.json
+    '''
+    	
+    '''
+    '''
+    	which service is running at which location
+    '''
+    '''
+    	return ack
+    '''
+
+    return {"Response":"OK/ERROR"}
+ @app.route('/get_service_location/<service>')
+def get_service_location(service):
+    '''
+    	OUTPUT
+    	{
+    		{
+			"ip":ip,
+			"port":port,
+			"username":username,
+			"password",password
+
+    		}
+
+    		OF THAT SERVICE
+		
+    	}
+    '''
+    return {"Response":"OK/ERROR"}
+
 
 @app.route('/get_free_list')
 def get_free_list():
