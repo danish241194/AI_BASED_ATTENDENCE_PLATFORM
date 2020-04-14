@@ -4,6 +4,7 @@ import json
 import requests
 import threading 
 import time
+app = Flask(__name__)
 
 @app.route('/store/<service>', methods=['GET', 'POST'])
 def store(service):
@@ -62,7 +63,16 @@ def add_machine():
 def service_entry():
     content = request.json
     '''
-    	
+    	{
+			"servicename":scheduler
+			
+			"ip":ip,
+			"port":port,
+			"username":username,
+			"password",password,
+    		
+
+    	}
     '''
     '''
     	which service is running at which location
@@ -81,8 +91,7 @@ def get_service_location(service):
 			"ip":ip,
 			"port":port,
 			"username":username,
-			"password",password
-
+			"password",password,
     		}
 
     		OF THAT SERVICE

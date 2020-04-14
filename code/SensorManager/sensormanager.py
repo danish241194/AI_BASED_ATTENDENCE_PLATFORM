@@ -4,6 +4,7 @@ import json
 import requests
 import threading 
 import time
+app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
@@ -182,7 +183,7 @@ if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
 	ap.add_argument("-i","--registry_ip",required=True)
-	ap.add_argument("-i","--registry_port",required=True)
+	ap.add_argument("-x","--registry_port",required=True)
 	args = vars(ap.parse_args())       
 	
 	"""

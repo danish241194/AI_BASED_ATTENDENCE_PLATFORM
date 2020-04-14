@@ -4,6 +4,7 @@ import json
 import requests
 import threading 
 import time
+app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
