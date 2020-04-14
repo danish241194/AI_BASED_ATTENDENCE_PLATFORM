@@ -16,7 +16,8 @@ def add_attendence():
 	{
 		"institue_id":1213,
 		"course":cs123,
-		"present":[roll_no_1,roll_no_2,...]
+		"present":[{"roll_no":roll_no_1,"attendence":"P"},{"roll_no":roll_no_1,"attendence":"P"},....]
+		"date":"DD-MM-YYYY"
 	}
     """
 
