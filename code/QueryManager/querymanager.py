@@ -11,15 +11,20 @@ app = Flask(__name__)
 
 institute_attendance = {}
 corporate_attendance = {}
+
 '''
 data structure format
 
 institute_attendance = {
 	"ins_id": {
-		"course": {
-			"date": {
-				"roll_no1": 1,
-				"roll_no2": 2
+		"course1": {
+			"date1": {
+				"roll_no1": 0/1,
+				"roll_no2": 0/1
+			},
+			"date2": {
+				"roll_no2": 0/1,
+				"roll_no1": 0/1
 			}
 		}
 	}
@@ -51,7 +56,7 @@ REGISTRY_PORT = None
 def add_attendence(x):
 	content = request.json
 	"""
-    content
+	content
 	{
 		"institute_id":1213,
 		"course":cs123,
@@ -62,11 +67,12 @@ def add_attendence(x):
 		}
 		"date":"DD-MM-YYYY"
 	}
-    """
+	"""
 	content_dict = json.loads(content)
 
 	ins_id = content_dict["institute_id"]
 	course = content_dict["course"]
+	#converting date into python module "datetime" format before storing
 	date = datetime.datetime.strptime(content_dict["date"], '%d-%m-%Y')
 	student_attendance = content_dict["attendance"]
 
@@ -134,6 +140,7 @@ def get_attendence():
 	ins_id = content_dict["institute_id"]
 	course_list = content_dict["query"]["courses"]
 	student_list = content_dict["query"]["students"]
+	#converting date into python module "datetime" format before storing
 	st_date = datetime.datetime.strptime(content_dict["query"]["start_date"], '%d-%m-%Y')
 	e_date = datetime.datetime.strptime(content_dict["query"]["end_date"], '%d-%m-%Y')
 
@@ -156,13 +163,15 @@ def get_attendence():
 				output_dict[course] = {}
 				start_date = st_date
 				end_date = e_date
+
 				while start_date <= end_date:
 					if start_date in institute_attendance[ins_id][course]:
 						present_student_list = []
 						attendance_dict = institute_attendance[ins_id][course][start_date]
-						for key, val in attendance_dict.items():
-							if val == 1 and (key in student_list or student_list[0] == "ALL"):
-								present_student_list.append(key)
+						for student, val in attendance_dict.items():
+							if val == 1 and (student in student_list or student_list[0] == "ALL"):
+								present_student_list.append(student)
+						#converting datetime format into "dd-mm-yyyy" format
 						output_dict[course][start_date.strftime('%d-%m-%Y')] = present_student_list
 					start_date += datetime.timedelta(days=1)
 
