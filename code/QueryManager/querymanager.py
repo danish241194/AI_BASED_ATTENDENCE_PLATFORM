@@ -11,7 +11,6 @@ app = Flask(__name__)
 
 institute_attendance = {}
 corporate_attendance = {}
-
 '''
 data structure format
 
