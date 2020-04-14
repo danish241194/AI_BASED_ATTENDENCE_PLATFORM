@@ -101,13 +101,14 @@ def get_attendence():
 					"start_date":"12-03-2020"
 					"end_date":"22-04-2020"
 					"condition":{
-							"greater_than":"80"   FOR INDIVIDUAL COURSES
-							"less_than":"50"    
-						}
-					CONDITION CAN BE NONE IF CONDITION IS NOT NONE THEN EITHER greater_than OR less_than will be present
+						"greater_than":"80" (or "less_than":"50")   (FOR INDIVIDUAL COURSES)
+					}
+					If condition is none condition will not be present as a key,
+					otherwise it will either have greater_than or less_than (not both)
 			}
 	}
 	"""
+
 	"""
 	output if no condition
 	{
@@ -240,7 +241,7 @@ def get_attendence_corporate():
 			"end_date":"22-04-2020"
 			"effective_time":"YES" or None
 			"condition":{
-				"greater_than":"80"   FOR INDIVIDUAL COURSES
+				"greater_than":"80"
 			}
 		}
 	}
