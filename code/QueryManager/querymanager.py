@@ -85,6 +85,8 @@ def add_attendence_corporate():
 		"corporate_id":1213,
 		"type":"IN/OUT",
 		"ids":[emp_no_1,emp_no_2,...] 
+		"date":DD-MM-YY"
+		"time":
 
 	}
 
@@ -106,7 +108,6 @@ def get_attendence_corporate():
 			"effective_time":"YES" or None
 			"condition":{
 				"greater_than":"80"   FOR INDIVIDUAL COURSES
-				"less_than":"50"	
 			}
 		}
 	}

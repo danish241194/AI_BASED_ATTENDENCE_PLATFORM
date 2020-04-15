@@ -41,11 +41,9 @@ def run_service(service):
 					"password",password,
 		    			}
 		    res = requests.post('http://registryip:registryport/service_entry', json=data)
-
-			
 		
     '''
-    return {"Response":"OK/ERROR"}
+    return {"Response":data}
 
 
 def data_dumping_service():
