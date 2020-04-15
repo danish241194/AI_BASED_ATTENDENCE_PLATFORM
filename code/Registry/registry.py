@@ -6,9 +6,27 @@ import threading
 import time
 app = Flask(__name__)
 
+
+
 @app.route('/store/<service>', methods=['GET', 'POST'])
 def store(service):
     content = request.json
+
+    registry_path = "/registry.pickle"
+
+    data = pickle.loads(open(registry_path,"rb").read())
+
+    try:
+        data[service] = content
+        # print(data)
+        f = open(registry_path,"wb")
+        f.write(pickle.dumps(data))
+        f.close()
+        return {"Response":"OK"}
+
+    except:
+        return {"Response":"ERROR"}
+
     """
     content
 	{
@@ -17,20 +35,30 @@ def store(service):
 	}
     """
 
-    return {"Response":"OK/ERROR"}
-
 
 @app.route('/fetch/<service>')
 def fetch(service):
-    '''
-    return data what ever was latest stored by the service
-    '''
+    data = pickle.loads(open(registry_path,"rb").read())
 
-    return data
+    try:
+    	return data[service]
 
+    except:
+    	return "ERROR"
+
+free_list = list()
 @app.route('/add_machine', methods=['GET', 'POST'])
 def add_machine():
     content = request.json
+
+    try:
+	    for machines in content[machines]:
+	    	for machine in machines.values():
+		    	free_list.append(machine)
+	    return {"Response":"OK"}
+	except:
+		return {"Response":"ERROR"}
+
     '''
     	{
 			machines:[
@@ -56,10 +84,10 @@ def add_machine():
     	return ack
     '''
 
-    return {"Response":"OK/ERROR"}
+    
 
 
- @app.route('/service_entry', methods=['GET', 'POST'])
+@app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
     content = request.json
     '''
@@ -82,7 +110,7 @@ def service_entry():
     '''
 
     return {"Response":"OK/ERROR"}
- @app.route('/get_service_location/<service>')
+@app.route('/get_service_location/<service>')
 def get_service_location(service):
     '''
     	OUTPUT
@@ -104,6 +132,11 @@ def get_service_location(service):
 @app.route('/get_free_list')
 def get_free_list():
     content = request.json
+
+    if len(free_list) == 0:
+    	return {"res":"NO_MACHINE_AVAILABLE"}
+    else:
+    	return {"res":"OK","free_list":free_list}
     
     '''
     	free_list = [{"ip":ip,"port":port"username":username,"password":password},
@@ -111,18 +144,24 @@ def get_free_list():
     				]
     '''
 
-    return {"res":"OK","free_list":free_list} or {"res":"NO_MACHINE_AVAILABLE"}
+    # return {"res":"OK","free_list":free_list} or {"res":"NO_MACHINE_AVAILABLE"}
 
 
 @app.route('/remove_from_free_list')
-def get_free_list():
+def remove_free_list():
     content = request.json
+
+    if len(free_list) == 0:
+    	return {"response":"NO_MACHINE_AVAILABLE"}
+    else:
+    	free_list.pop(0)
+    	return {"Response":"OK"}
     
     '''
     	remove first machine from free_list
     '''
 
-    return {"response":"OK"}
+    
 
 
 
