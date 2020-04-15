@@ -4,6 +4,7 @@ import json
 import requests
 import threading 
 import time
+import pickle
 app = Flask(__name__)
 
 REGISTRY_IP = None
@@ -33,7 +34,7 @@ def run_service(service):
 
 		   add the entry of these two services in registry
 
-				as  data = {
+				as  data = {get_free_list():
 					"servicename":scheduler
 					"ip":ip,
 					"port":port,
@@ -45,7 +46,7 @@ def run_service(service):
 			
 		
     '''
-    return {"Response":"OK/ERROR"}
+    return {"Response":data}
 
 
 def data_dumping_service():
@@ -72,4 +73,20 @@ if __name__ == "__main__":
 	t1 = threading.Thread(target=data_dumping_service) 
 	t1.start()
 	"""
-	app.run(debug=True,port=int(args["port"])) 
+	# app.run(debug=True,port=int(args["port"])) 
+
+	data = {
+			"servicename":"scheduler",
+
+			"ip":"127.9.9.9",
+			"port":"9000",
+			"username":"username",
+			"password":"password"
+			}
+	print("ok1")
+	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
+	print(res)
+	print("ok2")
+	data = {}
+	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler", json=data)
+	print(res)

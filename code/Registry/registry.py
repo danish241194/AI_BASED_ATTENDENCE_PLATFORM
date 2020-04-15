@@ -10,30 +10,30 @@ app = Flask(__name__)
 
 @app.route('/store/<service>', methods=['GET', 'POST'])
 def store(service):
-    content = request.json
+	content = request.json
 
-    registry_path = "/registry.pickle"
+	registry_path = "/registry.pickle"
 
-    data = pickle.loads(open(registry_path,"rb").read())
+	data = pickle.loads(open(registry_path,"rb").read())
 
-    try:
-        data[service] = content
-        # print(data)
-        f = open(registry_path,"wb")
-        f.write(pickle.dumps(data))
-        f.close()
-        return {"Response":"OK"}
+	try:
+	    data[service] = content
+	    # print(data)
+	    f = open(registry_path,"wb")
+	    f.write(pickle.dumps(data))
+	    f.close()
+	    return {"Response":"OK"}
 
-    except:
-        return {"Response":"ERROR"}
+	except:
+	    return {"Response":"ERROR"}
 
-    """
-    content
+	"""
+	content
 	{
 		
 		"data":{json}
 	}
-    """
+	"""
 
 
 @app.route('/fetch/<service>')
@@ -49,18 +49,16 @@ def fetch(service):
 free_list = list()
 @app.route('/add_machine', methods=['GET', 'POST'])
 def add_machine():
-    content = request.json
-
-    try:
-	    for machines in content[machines]:
-	    	for machine in machines.values():
-		    	free_list.append(machine)
-	    return {"Response":"OK"}
+	content = request.json
+	try:
+		for machines in content[machines]:
+			for machine in machines.values():
+				free_list.append(machine)
+		return {"Response":"OK"}
 	except:
 		return {"Response":"ERROR"}
-
-    '''
-    	{
+	'''
+		{
 			machines:[
 				machine_1:{
 							"ip":ip,
@@ -75,14 +73,14 @@ def add_machine():
 							"password":password
 					}
 				]
-    	}
-    '''
-    '''
-    add this in free list
-    '''
-    '''
-    	return ack
-    '''
+		}
+	'''
+	'''
+	add this in free list
+	'''
+	'''
+		return ack
+	'''
 
     
 
@@ -90,7 +88,8 @@ servloc_dict = dict()
 @app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
     content = request.json
-    
+    print("ok")
+
     servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] , \
     "username":content["username"] , "password":content["password"] }
     '''
@@ -119,21 +118,21 @@ def get_service_location(service):
 		return servloc_dict[service]
 	except:
 		return "ERROR"
-    '''
-    	OUTPUT
-    	{
-    		{
+	'''
+		OUTPUT
+		{
+			{
 			"ip":ip,
 			"port":port,
 			"username":username,
 			"password",password,
-    		}
+			}
 
-    		OF THAT SERVICE
+			OF THAT SERVICE
 		
-    	}
-    '''
-    return {"Response":"OK/ERROR"}
+		}
+	'''
+	return {"Response":"OK/ERROR"}
 
 
 @app.route('/get_free_list')
