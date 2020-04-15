@@ -86,10 +86,13 @@ def add_machine():
 
     
 
-
+servloc_dict = dict()
 @app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
     content = request.json
+    
+    servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] , \
+    "username":content["username"] , "password":content["password"] }
     '''
     	{
 			"servicename":scheduler
@@ -112,6 +115,10 @@ def service_entry():
     return {"Response":"OK/ERROR"}
 @app.route('/get_service_location/<service>')
 def get_service_location(service):
+	try:
+		return servloc_dict[service]
+	except:
+		return "ERROR"
     '''
     	OUTPUT
     	{
