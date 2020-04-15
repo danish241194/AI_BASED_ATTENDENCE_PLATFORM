@@ -84,9 +84,8 @@ if __name__ == "__main__":
 			"password":"password"
 			}
 	print("ok1")
-	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
-	print(res)
+	res = requests.post("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
+	print(res.json())
 	print("ok2")
-	data = {}
-	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler", json=data)
-	print(res)
+	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler")
+	print(res.json())
