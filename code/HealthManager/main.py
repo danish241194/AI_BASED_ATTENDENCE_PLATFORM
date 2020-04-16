@@ -18,9 +18,9 @@ import json
 				if res.ok
 					//do nothing
 				else
-					res = requests.get('http://'+REGISTRY_IP+':'+int(REGISTRY_PORT)+'/get_service_location/service_life_cycle')
-					content = res.json()
-					service_lcm_ip,port = content["ip"],content["ip"]
+	#				res = requests.get('http://'+REGISTRY_IP+':'+int(REGISTRY_PORT)+'/get_service_location/service_life_cycle')
+	#				content = res.json()
+	#				service_lcm_ip,port = content["ip"],content["ip"]
 					res = requests.get('http://service_lcm_ip:port/run_service/<service>')
 
 

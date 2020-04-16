@@ -1,16 +1,89 @@
 import argparse
 from flask import Flask,request,jsonify
-import json
+import pickle
 import requests
 import threading 
 import time
+import os
 app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
+institueToCameraPickle = "./institueToCamera.p"
+newCamerasAdded = 0
+cameraThreshould = 10
+
+class Camera :
+	def __init__(cameraID) :
+		self.cameraID = cameraID
+
+	def getCameraID() :
+		return cameraID
+
+institueToCamera = {}
+
+def loadInstituteToCamera() :
+	with open(institueToCameraPickle, 'rb') as fp:
+    	institueToCamera = pickle.load(fp)
+
+def inititalizeInstituteToCamera() :
+	if(len(institueToCamera) == 0 ) :
+		if(os.path.isfile(institueToCameraJSON)) :
+			loadInstituteToCamera()
+
+def dumpInstituteToCamera() :
+	with open(institueToCameraPickle, 'wb') as fp:
+    	pickle.dump(institueToCamera, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+def validateAddCameraInput(content) :
+	returnValue = 'INVALID_INPUT'
+	if 'institue_id' in content :
+		if 'cameras' in content['institue_id'] :
+			if 'camera_id' in content['institue_id']['cameras'] and 'room_id' in content['institue_id']['cameras'] :
+				returnValue = 'sucess' 
+			
+	return returnValue 
+
+def ifExist( key, newCamera) :
+	returnValue = 'success'
+	if key in institueToCamera and institueToCamera[key] == newCamera :
+		returnValue = 'DUPLICATE_ELEMENT' 
+
+	return returnValue
+
 @app.route('/institue/add_camera', methods=['GET', 'POST'])
 def add_camera():
     content = request.json
+
+    errorCode = 'success'
+
+    errorCode = validateAddCameraInput(content)
+
+    if(errorCode != 'success') : #add code to update log file
+    	print("add_camera : " + errorCode)
+    	return 
+
+    institueID = content['institue_id']
+
+    inititalizeInstituteToCamera()
+
+    for camera in content['cameras'] :
+    	cameraID = institueID + "_" + content['cameras']['room_id'] + "_" content['cameras']['camera_id'] 
+    	keyToCamera = institueID + "_" + content['cameras']['room_id']
+    	camera = Camera(cameraID) 
+    	errorCode = ifExist(keyToCamera, camera)
+    	if errorCode == 'success' :
+    		institueToCamera[keyToCamera] = cameraID 
+    		newCamerasAdded += 1 
+    		if(newCamerasAdded == cameraThreshould) :
+    			dumpInstituteToCamera()
+    			newCamerasAdded = 0 
+    	else :
+    		print("add_camera : " + errorCode + " for value " + content['cameras']['camera_id'])
+
+
+
+
     """
     content
 	{
@@ -36,12 +109,40 @@ def add_camera():
 
 		cameras_unique_ids = [id1,id2]
     """
-    return {"Response":"OK/ERROR"}
+    returnValue = {"Response" : "OK"}
+    if errorCode != 'success' :
+    	returnValue = {"Response" : "ERROR"}
+    
+    return returnValue
 
+def validateGetCameraInput(content) :
+	returnValue = 'INVALID_INPUT'
+	if "institue_id" in content and "room_id" in content :
+		returnValue = 'success'
+
+	return returnValue
 
 @app.route('/institue/get_camera_instance', methods=['GET', 'POST'])
 def get_camera_instance():
     content = request.json
+
+    errorCode = 'success'
+
+    errorCode = validateGetCameraInput(content)
+
+    if errorCode != 'success' :
+    	print("get_camera_instance : " + errorCode)
+    	returnValue =  errorCode
+    else :
+	    inititalizeInstituteToCamera()
+	    key = content['institue_id'] + "_" + content["room_id"]
+
+	    if key in institueToCamera :
+			returnValue = institueToCamera[key].getCameraID()
+		else :
+			returnValue = "Not initialized"
+
+	return returnValue
     """
     input
     {
@@ -57,7 +158,7 @@ def get_camera_instance():
 	    }
 
     """
-    return OUTPUT
+    # return OUTPUT
 
 def data_fetching(topic):
 	"""
