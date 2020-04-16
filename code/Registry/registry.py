@@ -7,9 +7,9 @@ import time
 app = Flask(__name__)
 
 
-
 @app.route('/store/<service>', methods=['GET', 'POST'])
 def store(service):
+	
 	content = request.json
 
 	registry_path = "/registry.pickle"
