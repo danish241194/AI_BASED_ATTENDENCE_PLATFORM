@@ -1,0 +1,50 @@
+<!doctype html>
+
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+    <meta charset="utf-8">
+    <title>App login</title>
+    <meta name="author" content="SitePoint">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css?v=1.0">
+
+</head>
+
+<body style="height: 100%; width: 100%;background-color:#f2f2f2 ;">
+    <script src="../static/js/login.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <div class="container" style="height: 100%; width: 100%;">
+        <div class="row" style="height: 100%; width: 100%;">
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+                <div class="container" style="height: 40%; width: 100%; margin-top: 50%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
+                    <p style="text-align: center; color: #4d94ff; font-size: 15px; margin-bottom: 6%;">Login to your account</p>
+                    <div class="form-group" style="width: 75%; margin-left: 15%;">
+                        <input type="text" class="form-control"  placeholder="User ID" id="user_id">
+                      </div>
+                    <div class="form-group" style="width: 75%; margin-left: 15%;">
+                        <input type="password" class="form-control"  placeholder="Password" id="password_id">
+                    </div>
+                    <div class="form-group" style="width: 75%; margin-left: 15%;">
+                        <a style="float: left;padding: 7px; color: #ff3333;" href="/register">Register user</a>
+                        <button type="button" class="btn btn-primary" style="float: right; background-color: #4d94ff;" onclick="loginClicked()">Login</button>
+                    </div>
+                    {% with messages = get_flashed_messages() %}
+                        {% for message in messages %}
+                            {% if message %}
+                                <script>alert("user successfully registered")</script>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+
+            </div>
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
