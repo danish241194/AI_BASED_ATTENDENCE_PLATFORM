@@ -1,6 +1,6 @@
 import argparse
 from flask import Flask,request,jsonify
-import json
+import pickle
 import requests
 import threading 
 import time
@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
-institueToCameraJSON = "./institueToCamera.json"
+institueToCameraPickle = "./institueToCamera.p"
 newCamerasAdded = 0
 cameraThreshould = 10
 
@@ -23,8 +23,8 @@ class Camera :
 institueToCamera = {}
 
 def loadInstituteToCamera() :
-	with open(institueToCameraJSON, 'r') as fp:
-    	institueToCamera = json.load(fp)
+	with open(institueToCameraPickle, 'rb') as fp:
+    	institueToCamera = pickle.load(fp)
 
 def inititalizeInstituteToCamera() :
 	if(len(institueToCamera) == 0 ) :
@@ -32,8 +32,8 @@ def inititalizeInstituteToCamera() :
 			loadInstituteToCamera()
 
 def dumpInstituteToCamera() :
-	with open(institueToCameraJSON, 'w') as fp:
-    	json.dump(institueToCamera, fp, indent = 4)	
+	with open(institueToCameraPickle, 'wb') as fp:
+    	pickle.dump(institueToCamera, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
 def validateAddCameraInput(content) :
 	returnValue = 'INVALID_INPUT'
