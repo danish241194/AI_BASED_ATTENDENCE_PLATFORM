@@ -51,8 +51,8 @@ institute_attendance = {
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
-@app.route('/institute/add_attendence', methods=['GET', 'POST'])
-def add_attendence(x):
+@app.route('/institute/add_attendance', methods=['GET', 'POST'])
+def add_attendance():
 	content = request.json
 	"""
 	content
@@ -84,8 +84,8 @@ def add_attendence(x):
 	return {"Response":"OK"}
 
 
-@app.route('/institute/get_attendence', methods=['GET', 'POST'])
-def get_attendence():
+@app.route('/institute/get_attendance', methods=['GET', 'POST'])
+def get_attendance():
 	content = request.json
 	"""
 	input
@@ -227,16 +227,16 @@ corporate_attendance = {
 
 corporate_attendance = {}
 
-@app.route('/corporate/add_attendence', methods=['GET', 'POST'])
-def add_attendence_corporate():
+@app.route('/corporate/add_attendance', methods=['GET', 'POST'])
+def add_attendance_corporate():
 	content = request.json
 	"""
 	content
 	{
 		"corporate_id":1213,
 		"type":"IN/OUT",
-		"ids":[emp_no_1,emp_no_2,...] 
-		"date":"DD-MM-YY"
+		"ids":[emp_no_1,emp_no_2,...],
+		"date":"DD-MM-YY",
 		"time":"hh:mm:ss"
 	}
 	"""
@@ -278,8 +278,8 @@ def add_attendence_corporate():
 
 
 
-@app.route('/corporate/get_attendence', methods=['GET', 'POST'])
-def get_attendence_corporate():
+@app.route('/corporate/get_attendance', methods=['GET', 'POST'])
+def get_attendance_corporate():
 	content = request.json
 	"""
 	input content
@@ -287,9 +287,9 @@ def get_attendence_corporate():
 		"corporate_id":1213,
 		"ids":[emp_no_1,emp_no_2] OR ["ALL"]
 		"query":{
-			"start_date":"12-03-2020"
-			"end_date":"22-04-2020"
-			"effective_time": "hh:mm:ss" or null (denoting the duration that an employee needs to be in the office)
+			"start_date":"12-03-2020",
+			"end_date":"22-04-2020",
+			"effective_time": "hh:mm:ss" or null (denoting the duration that an employee needs to be in the office),
 			"condition":{
 				"greater_than": 80
 				(or null)
