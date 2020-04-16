@@ -4,13 +4,85 @@ import json
 import requests
 import threading 
 import time
+import os
 app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
+institueToCameraJSON = "./institueToCamera.json"
+newCamerasAdded = 0
+cameraThreshould = 10
+
+class Camera :
+	def __init__(cameraID) :
+		self.cameraID = cameraID
+
+	def getCameraID() :
+		return cameraID
+
+institueToCamera = {}
+
+def loadInstituteToCamera() :
+	with open(institueToCameraJSON, 'r') as fp:
+    	institueToCamera = json.load(fp)
+
+def inititalizeInstituteToCamera() :
+	if(len(institueToCamera) == 0 ) :
+		if(os.path.isfile(institueToCameraJSON)) :
+			loadInstituteToCamera()
+
+def dumpInstituteToCamera() :
+	with open(institueToCameraJSON, 'w') as fp:
+    	json.dump(institueToCamera, fp, indent = 4)	
+
+def validateAddCameraInput(content) :
+	returnValue = 'INVALID_INPUT'
+	if 'institue_id' in content :
+		if 'cameras' in content['institue_id'] :
+			if 'camera_id' in content['institue_id']['cameras'] and 'room_id' in content['institue_id']['cameras'] :
+				returnValue = 'sucess' 
+			
+	return returnValue 
+
+def ifExist( oldCameras, newCamera) :
+	returnValue = 'success'
+	for camera in oldCameras :
+		if camera.getCameraID() == newCamera :
+			returnValue = 'DUPLICATE_ELEMENT' 
+
+	return returnValue
+
 @app.route('/institue/add_camera', methods=['GET', 'POST'])
 def add_camera():
     content = request.json
+
+    errorCode = 'success'
+
+    errorCode = validateAddCameraInput(content)
+
+    if(errorCode != 'success') : #add code to update log file
+    	return 
+
+    institueID = content['institue_id']
+
+    inititalizeInstituteToCamera()
+
+    for camera in content['cameras'] :
+    	cameraID = institueID + "_" + content['cameras']['room_id'] + "_" content['cameras']['camera_id'] 
+    	camera = Camera(cameraID) 
+    	errorCode = ifExist(institueToCamera[institueID], camera)
+    	if errorCode == 'success' :
+    		institueToCamera[institueID].appen(camera) 
+    		newCamerasAdded += 1 
+    		if(newCamerasAdded == cameraThreshould) :
+    			dumpInstituteToCamera()
+    			newCamerasAdded = 0 
+    	else :
+    		print(errorCode + " for value " + content['cameras']['camera_id'])
+
+
+
+
     """
     content
 	{
