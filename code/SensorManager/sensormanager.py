@@ -44,11 +44,10 @@ def validateAddCameraInput(content) :
 			
 	return returnValue 
 
-def ifExist( oldCameras, newCamera) :
+def ifExist( key, newCamera) :
 	returnValue = 'success'
-	for camera in oldCameras :
-		if camera.getCameraID() == newCamera :
-			returnValue = 'DUPLICATE_ELEMENT' 
+	if key in institueToCamera and institueToCamera[key] == newCamera :
+		returnValue = 'DUPLICATE_ELEMENT' 
 
 	return returnValue
 
@@ -61,6 +60,7 @@ def add_camera():
     errorCode = validateAddCameraInput(content)
 
     if(errorCode != 'success') : #add code to update log file
+    	print("add_camera : " + errorCode)
     	return 
 
     institueID = content['institue_id']
@@ -69,16 +69,17 @@ def add_camera():
 
     for camera in content['cameras'] :
     	cameraID = institueID + "_" + content['cameras']['room_id'] + "_" content['cameras']['camera_id'] 
+    	keyToCamera = institueID + "_" + content['cameras']['room_id']
     	camera = Camera(cameraID) 
-    	errorCode = ifExist(institueToCamera[institueID], camera)
+    	errorCode = ifExist(keyToCamera, camera)
     	if errorCode == 'success' :
-    		institueToCamera[institueID].appen(camera) 
+    		institueToCamera[keyToCamera] = cameraID 
     		newCamerasAdded += 1 
     		if(newCamerasAdded == cameraThreshould) :
     			dumpInstituteToCamera()
     			newCamerasAdded = 0 
     	else :
-    		print(errorCode + " for value " + content['cameras']['camera_id'])
+    		print("add_camera : " + errorCode + " for value " + content['cameras']['camera_id'])
 
 
 
@@ -108,12 +109,40 @@ def add_camera():
 
 		cameras_unique_ids = [id1,id2]
     """
-    return {"Response":"OK/ERROR"}
+    returnValue = {"Response" : "OK"}
+    if errorCode != 'success' :
+    	returnValue = {"Response" : "ERROR"}
+    
+    return returnValue
 
+def validateGetCameraInput(content) :
+	returnValue = 'INVALID_INPUT'
+	if "institue_id" in content and "room_id" in content :
+		returnValue = 'success'
+
+	return returnValue
 
 @app.route('/institue/get_camera_instance', methods=['GET', 'POST'])
 def get_camera_instance():
     content = request.json
+
+    errorCode = 'success'
+
+    errorCode = validateGetCameraInput(content)
+
+    if errorCode != 'success' :
+    	print("get_camera_instance : " + errorCode)
+    	returnValue =  errorCode
+    else :
+	    inititalizeInstituteToCamera()
+	    key = content['institue_id'] + "_" + content["room_id"]
+
+	    if key in institueToCamera :
+			returnValue = institueToCamera[key].getCameraID()
+		else :
+			returnValue = "Not initialized"
+
+	return returnValue
     """
     input
     {
@@ -129,7 +158,7 @@ def get_camera_instance():
 	    }
 
     """
-    return OUTPUT
+    # return OUTPUT
 
 def data_fetching(topic):
 	"""
