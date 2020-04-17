@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>App login</title>
+    <title>Register user</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 
@@ -48,7 +48,6 @@
                     {% with messages = get_flashed_messages() %}
                         {% for message in messages %}
                             {% if message %}
-                                <p>{{ message }}</p>
                                 {% if message == "incomplete" %}
                                     <script>alert("Fill all fields")</script>
                                 {% else %}
