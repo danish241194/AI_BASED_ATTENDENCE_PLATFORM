@@ -10,13 +10,24 @@ REGISTRY_IP = None
 REGISTRY_PORT = None
 users_containers_load = [0]
 new_machine = {}
+
 new_machine["container_id"]=0
-new_machine["ip"]="172.17.0.2"
+new_machine["ip"]="172.17.0.1"
 new_machine["port"]="22"
-new_machine["username"]="root"
-new_machine["password"]="pppppp"
+new_machine["username"]="machine1"
+new_machine["password"]="password"
 
 users_containers_details = [new_machine]
+@app.route('/serverlcm/de_allocate_user_machine/<container_id>')
+def de_allocate_user_machine(container_id):
+	index = int(container_id)
+	users_containers_load[index]-=1
+	return {"res":"ok"}
+@app.route('/serverlcm/display_loads')
+def display_loads():
+	for i in range(len(users_containers_load)):
+		print("Container ",i," : ",users_containers_load[i])
+	return {"res":"ok"}
 
 @app.route('/serverlcm/allocate_user_machine', methods=['GET', 'POST'])
 def allocate_user_machine():

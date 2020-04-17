@@ -8,6 +8,9 @@ import paramiko
 from pathlib import Path
 import os
 import pickle
+from imutils import paths
+import subprocess
+from os import listdir
 app = Flask(__name__)
 
 REGISTRY_IP = None
@@ -79,28 +82,42 @@ def deploy_attendence():
     			copy encodigns of institute and attendnce wala code and pass end time also and run and also container id
     			code khud server life cycle ko bolega band mein khtm horaha hun load ke liye
 			else
-				do same and not send end time as it wont be in content
-
-			
+				do same and not send end time as it wont be in content			
 		"""
 	return {"Response":"OK/ERROR"}
+def transfer_files(folder_name,ssh_client,content_id):
+	ftp_client=ssh_client.open_sftp()
+	list_ = os.listdir("images/"+folder_name)
+	ssh_client.exec_command("mkdir "+content_id+"/"+folder_name)
+	for folder in list_:
+		ssh_client.exec_command("mkdir "+content_id+"/"+folder_name+"/"+folder)
+
+	imagePaths = list(paths.list_images("images/"+folder_name))
+	for path_ in imagePaths: 
+		
+		ftp_client.put(path_,content_id+"/"+'/'.join(path_.split("/")[1:]))
+	ftp_client.close()
 
 @app.route('/deployment/service/train_users', methods=['GET', 'POST'])
 def train_users():
 	content = request.json
 	"""
-	content = {"org":"institute","id":"id","zip_location":"zip_location"}
+	content = {"org":"institute","id":"id","zip_location":"zip_location"} dont incluce .zip also only filename
 	get machine
 	copy training code to machine
 	copy theis zip file there
 	"""
-	my_file = Path("encodings/"+content["id"])
-	if not my_file.is_dir():
 
+	'''
+
+		unzip zip_location and remove it
+
+	'''
+	my_file = Path("encodings/"+content["id"]+".pickle")
+	if not my_file.exists():
 		print("+ ENCODING NOT EXISTING")
-		os.system("mkdir "+"encodings/"+content["id"])
 		data = {"res":"new"}
-		f = open("encodings/"+content["id"]+"/encoding.pickle","wb")
+		f = open("encodings/"+content["id"]+".pickle","wb")
 		f.write(pickle.dumps(data))
 		f.close()
 		print("+CREATED NEW PATH FOR ENCODINGS")
@@ -111,6 +128,8 @@ def train_users():
 	server_content = res.json()
 	
 	container_id = server_content["container_id"]
+
+	print("\t- ID OF CONTAINER ASSIGNED : ",container_id)
 	ip = server_content["ip"]
 	port = server_content["port"]
 	username = server_content["username"]
@@ -131,16 +150,13 @@ def train_users():
 
 	ftp_client=ssh_client.open_sftp()
 	ftp_client.put("code/train_new_users.py",folder+"/train_new_users.py")
-	ftp_client.put("images/"+content["zip_location"],folder+"/"+content["zip_location"])
-
+	
 	ftp_client.close()
-
+	transfer_files(content["zip_location"],ssh_client, folder)	
 	print("\t- COPIED ATTENDENCE CODE")
 
-	ssh_client.exec_command("unzip "+folder+"/"+content["zip_location"]+" -d "+folder)
-	ssh_client.exec_command("rm "+folder+"/"+content["zip_location"])
-
-	arguments = "--container_id "+str(container_id)+" --org "+content["org"]+" --id "+content["id"] 
+	
+	arguments = "--dataset "+folder+"/"+content["zip_location"]+" --container_id "+str(container_id)+" --org "+content["org"]+" --id "+content["id"] 
 
 	ssh_client.exec_command("python3 "+folder+"/train_new_users.py "+arguments)
 
@@ -149,6 +165,19 @@ def train_users():
 	ssh_client.close()
 	return {"res":"ok"}
 
+@app.route('/deployment/service/send_me_encodings/<id>')
+def send_me_encodings(id):
+	print("+ REQUEST FROM RUN TIME SERVER TO SEND ENCODINGS FOR ID ",id)
+	data = pickle.loads(open("encodings/"+str(id)+".pickle","rb").read())
+	return data
+@app.route('/deployment/service/take_new_encodings/<id>', methods=['GET', 'POST'])
+def take_new_encodings(id):
+	print("+ REQUEST FROM RUN TIME SERVER TO STORE NEW ENCODINGS FOR ID ",id)
+	content = request.json
+	f = open("encodings/"+str(id)+".pickle","wb")
+	f.write(pickle.dumps(content))
+	f.close()
+	return {"res":"ok"}
 
 '''
 	The training code will ask for previous encodings if any to register
