@@ -7,9 +7,9 @@ import time
 app = Flask(__name__)
 
 
-
 @app.route('/store/<service>', methods=['GET', 'POST'])
 def store(service):
+	
 	content = request.json
 
 	registry_path = "/registry.pickle"
@@ -88,7 +88,7 @@ servloc_dict = dict()
 @app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
     content = request.json
-    print(content)
+    print("ok")
 
     servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] , \
     "username":content["username"] , "password":content["password"] }
@@ -112,7 +112,6 @@ def service_entry():
     '''
 
     return {"Response":"OK/ERROR"}
-
 @app.route('/get_service_location/<service>')
 def get_service_location(service):
 	try:
