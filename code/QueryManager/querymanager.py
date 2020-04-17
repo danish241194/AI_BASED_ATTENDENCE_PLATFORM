@@ -10,10 +10,9 @@ import datetime
 app = Flask(__name__)
 
 institute_attendance = {}
-corporate_attendance = {}
 
 '''
-data structure format
+data structure format for institute_attendance
 
 institute_attendance = {
 	"ins_id": {
@@ -52,14 +51,14 @@ institute_attendance = {
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
-@app.route('/institute/add_attendence', methods=['GET', 'POST'])
-def add_attendence(x):
+@app.route('/institute/add_attendance', methods=['GET', 'POST'])
+def add_attendance():
 	content = request.json
 	"""
 	content
 	{
-		"institute_id":1213,
-		"course":cs123,
+		"institute_id": 1213,
+		"course": "cs123",
 		"attendance": {
 			"roll_no2": 0/1,
 			"roll_no3": 0/1,
@@ -85,8 +84,8 @@ def add_attendence(x):
 	return {"Response":"OK"}
 
 
-@app.route('/institute/get_attendence', methods=['GET', 'POST'])
-def get_attendence():
+@app.route('/institute/get_attendance', methods=['GET', 'POST'])
+def get_attendance():
 	content = request.json
 	"""
 	input
@@ -100,11 +99,12 @@ def get_attendence():
 					"students":["roll_no_1", "roll_no_2"] OR ["ALL"]
 					"start_date":"12-03-2020"
 					"end_date":"22-04-2020"
-					"condition":{
-						"greater_than":"80" (or "less_than":"50")   (FOR INDIVIDUAL COURSES)
+					"condition":{                 (FOR INDIVIDUAL COURSES)
+						"greater_than": 80
+						(or "less_than": 50)
+						(or null)
 					}
-					If condition is none condition will not be present as a key,
-					otherwise it will either have greater_than or less_than (not both)
+					Condition will either be null or greater_than or less_than
 			}
 	}
 	"""
@@ -145,9 +145,7 @@ def get_attendence():
 	st_date = datetime.datetime.strptime(content_dict["query"]["start_date"], '%d-%m-%Y')
 	e_date = datetime.datetime.strptime(content_dict["query"]["end_date"], '%d-%m-%Y')
 
-	condition = None
-	if "condition" in content_dict["query"]:
-		condition = content_dict["query"]["condition"]
+	condition = content_dict["query"]["condition"]
 
 	if course_list[0] == "ALL":
 		course_list = list(institute_attendance[ins_id])
@@ -178,7 +176,7 @@ def get_attendence():
 
 	else:
 		cond_str = list(condition)[0]
-		cond_num = int(condition[cond_str])
+		cond_num = condition[cond_str]
 
 		for course in course_list:
 			if course in institute_attendance[ins_id]:
@@ -212,26 +210,76 @@ def get_attendence():
 	return json.dumps(output_dict)
 
 
-@app.route('/corporate/add_attendence', methods=['GET', 'POST'])
-def add_attendence_corporate():
+'''
+data structure format for corporate_attendance
+
+corporate_attendance = {
+	"corporate_id": {
+		"date1": {
+			"emp_no_1": {
+				"duration": "seconds" (duration for which he is in the office that day)
+				"last_in": "hh:mm:ss" or None (time at which he last went in the office)
+			}
+		}
+	}
+}
+'''
+
+corporate_attendance = {}
+
+@app.route('/corporate/add_attendance', methods=['GET', 'POST'])
+def add_attendance_corporate():
 	content = request.json
 	"""
 	content
 	{
 		"corporate_id":1213,
 		"type":"IN/OUT",
-		"ids":[emp_no_1,emp_no_2,...] 
-		"date":DD-MM-YY"
-		"time":
-
+		"ids":[emp_no_1,emp_no_2,...],
+		"date":"DD-MM-YY",
+		"time":"hh:mm:ss"
 	}
-
 	"""
-	return {"Response":"OK/ERROR"}
+	content_dict = json.loads(content)
+
+	corporate_id = content_dict["corporate_id"]
+	timestamp_type = content_dict["type"]
+	empid_list = content_dict["ids"]
+	date = content_dict["date"]
+	time = content_dict["time"]
+
+	timestamp = datetime.datetime.strptime(date + " " + time, '%d-%m-%Y %H:%M:%S')
+	date = datetime.datetime.strptime(date, '%d-%m-%Y')
+
+	if corporate_id not in corporate_attendance:
+		corporate_attendance[corporate_id] = {}
+
+	if date not in corporate_attendance[corporate_id]:
+		corporate_attendance[corporate_id][date] = {}
+
+	for emp in empid_list:
+		if emp not in corporate_attendance[corporate_id][date]:
+			corporate_attendance[corporate_id][date][emp] = {}
+			corporate_attendance[corporate_id][date][emp]["duration"] = 0 #intially duration would be zero
+			corporate_attendance[corporate_id][date][emp]["last_in"] = timestamp
+
+		if timestamp_type == "IN":
+			corporate_attendance[corporate_id][date][emp]["last_in"] = timestamp
+		else:
+			last_in_time = corporate_attendance[corporate_id][date][emp]["last_in"]
+			out_time = timestamp
+
+			duration_to_be_added = (out_time - last_in_time).seconds
+
+			corporate_attendance[corporate_id][date][emp]["duration"] += duration_to_be_added			
+
+	return {"Response":"OK"}
 
 
-@app.route('/corporate/get_attendence', methods=['GET', 'POST'])
-def get_attendence_corporate():
+
+
+@app.route('/corporate/get_attendance', methods=['GET', 'POST'])
+def get_attendance_corporate():
 	content = request.json
 	"""
 	input content
@@ -239,12 +287,12 @@ def get_attendence_corporate():
 		"corporate_id":1213,
 		"ids":[emp_no_1,emp_no_2] OR ["ALL"]
 		"query":{
-			"start_date":"12-03-2020"
-			"end_date":"22-04-2020"
-			"effective_time":"YES" or None
+			"start_date":"12-03-2020",
+			"end_date":"22-04-2020",
+			"effective_time": "hh:mm:ss" or null (denoting the duration that an employee needs to be in the office),
 			"condition":{
-				"greater_than":"80"   FOR INDIVIDUAL COURSES
-
+				"greater_than": 80
+				(or null)
 			}
 		}
 	}
@@ -253,27 +301,91 @@ def get_attendence_corporate():
 
 	"""
 	OUTPUT
-	case 1: if effective time is None
-				subcase 1: if condition is None:
-						OUTPUT = {
-									"date_1":[emp_no_1,emp_no_2],
-									"date_2":[emp_no_1,emp_no_2],
-									.
-									.
 
-							}
-				subcase 2: if condition is Not None
-						OUTPUT = {
-								ids:[emp_1,emp_2]   these are the emps whose attendence between start and end date is according to condition
-							}
-	case 2: if effective time is not None
-			in this case condition will always be present
-				
-						OUTPUT = {
-								ids:[emp_1,emp_2]   these are the emps whose average effective time between start and end date  is according to condition
-							}
+	Case 1: if condition is None:
+		OUTPUT = {
+			"date_1": [emp_no_1,emp_no_2],
+			"date_2": [emp_no_1,emp_no_2],
+			.
+			.
+		}
++
++	Case 2: if condition is Not None
+		OUTPUT = {
+			"ids": [emp_1,emp_2]   these are the emps whose attendence between start and end date is according to condition
+		}
+	
 	"""
-	return OUTPUT
+
+	content_dict = json.loads(content)
+
+	corporate_id = content_dict["corporate_id"]
+	empid_list = content_dict["ids"]
+	start_date = datetime.datetime.strptime(content_dict["query"]["start_date"], '%d-%m-%Y')
+	end_date = datetime.datetime.strptime(content_dict["query"]["end_date"], '%d-%m-%Y')
+	duration_string = content_dict["query"]["effective_time"]
+	condition = content_dict["query"]["condition"]
+
+	if duration_string == None:
+		effective_time = 0
+	else:
+		#converting effective_time_string to seconds
+		effective_time = int(duration_string[:2])*3600 + int(duration_string[3:5])*60 + int(duration_string[6:])
+
+
+	'''
+	data structure format for corporate_attendance
+
+	corporate_attendance = {
+		"corporate_id": {
+			"date1": {
+				"emp_no_1": {
+					"duration": "seconds" (duration for which he is in the office that day)
+					"last_in": "hh:mm:ss" or None (time at which he last went in the office)
+				}
+			}
+		}
+	}
+	'''
+
+	output_dict = {}
+
+	if condition is None:
+		while start_date <= end_date:
+			if start_date in corporate_attendance[corporate_id]:
+				present_emp_list = []
+				for emp in corporate_attendance[corporate_id][start_date]:
+					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][start_date][emp]["duration"] > effective_time:
+						present_emp_list.append(emp)
+
+				output_dict[start_date.strftime('%d-%m-%Y')] = present_emp_list
+
+			start_date += datetime.timedelta(days=1)
+
+	else:
+		output_dict["ids"] = []
+		parameter = condition[list(condition)[0]]
+		
+		days_present_per_employee = {}
+		num_working_days = 0
+
+		while start_date <= end_date:
+			
+			if start_date in corporate_attendance[corporate_id]:
+				num_working_days += 1
+				for emp in corporate_attendance[corporate_id][start_date]:
+					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][start_date][emp]["duration"] > effective_time:
+						if emp not in days_present_per_employee:
+							days_present_per_employee[emp] = 0
+						days_present_per_employee[emp] += 1
+
+			start_date += datetime.timedelta(days=1)
+
+		for emp in days_present_per_employee:
+			if (days_present_per_employee[emp]/num_working_days)*100 > parameter:
+				output_dict["ids"].append(emp)
+
+	return json.dumps(output_dict)
 
 
 def data_dumping_service():
