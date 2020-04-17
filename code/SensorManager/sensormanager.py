@@ -12,6 +12,9 @@ app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
+KAFKA_IP = None
+KAFKA_PORT = None
+
 institueToCameraPickle = "./institueToCamera.p"
 institueToCamera = {}
 newCamerasAdded = 0
@@ -66,7 +69,7 @@ def ifExist( key, newCamera) :
 	return returnValue
 
 def createKafkaTopic(topicName) :
-	admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092")
+	admin_client = KafkaAdminClient(bootstrap_servers=KAFKA_IP + ":" + KAFKA_PORT)
 	topic_list = []
 	topic_list.append(NewTopic(name=topicName, num_partitions=1, replication_factor=1))
 	admin_client.create_topics(new_topics=topic_list, validate_only=False)
@@ -184,7 +187,7 @@ def get_camera_instance():
     # return OUTPUT
 
 # def data_fetching(topic):
-	# consumer = KafkaConsumer(bootstrap_servers="localhost:9092")
+	# consumer = KafkaConsumer(bootstrap_servers="KAFKA_IP + ":" + KAFKA_PORT")
 
 
 	"""
@@ -223,7 +226,7 @@ def start_fetching():
 
     if errorCode == 'success' :
     	topicName = content["unique_id"]
-    	producer = KafkaProducer(bootstrap_servers="localhost:9092")
+    	producer = KafkaProducer(bootstrap_servers=KAFKA_IP + ":" + KAFKA_PORT)
     	thread = threading.Thread(target=streamImages, args=(producer, topicName,))
     	thread.start()
 
@@ -293,6 +296,29 @@ def upload_image(unique_id):
    
     return returnValue
 
+def validateStopFecthingInput(content) :
+	returnValue = 'INVALID_INPUT'
+	if "institue_id" in content and "unique_id" in content :
+		errorCode = 'success'
+
+	return returnValue
+
+@app.route('/institue/stop_fetching', methods=['GET', 'POST'])
+def stop_fetching() :
+	"""
+	input
+    {
+    	"institue_id":"ins_id"
+    	"unique_id":"unique_id"
+    }
+    """
+    content = request.json
+    errorCode = validateStopFecthingInput(content)
+
+    if errorCode == 'success' :
+    	instituteCamerasOnStream[topicName] = False
+    else :
+    	print("stop_fetching : " + errorCode)
 
 corporateToCameraPickle = "./corporateToCamera.p"
 corporateToCamera = {}
@@ -416,7 +442,7 @@ def validateStartFetchingCorporateInput(content) :
 	return returnValue
 
 def streamCorporateImages(producer, topicName) :
-	corporateCamerasOnStream[topicName] = True ;
+	corporateCamerasOnStream[topicName] = True 
 	lastImageSent = "" 
 	while True :
 		if corporateCamerasOnStream[topicName] :
@@ -428,7 +454,6 @@ def streamCorporateImages(producer, topicName) :
 
 		sleep(5)
 
-
 @app.route('/corporate/start_fetching', methods=['GET', 'POST'])
 def start_fetching_corporate():
     content = request.json
@@ -437,7 +462,7 @@ def start_fetching_corporate():
 
     if errorCode == 'success' :
     	topicName = content["unique_id"]
-    	producer = KafkaProducer(bootstrap_servers="localhost:9092")
+    	producer = KafkaProducer(bootstrap_servers=KAFKA_IP + ":" + KAFKA_PORT)
     	thread = threading.Thread(target=streamCorporateImages, args=(producer, topicName,))
     	thread.start()
 
@@ -552,6 +577,30 @@ def get_corporate_camera_instance():
     """
     # return OUTPUT
 
+def validateStopCorporateFetchingInput(content) :
+	returnValue = 'INVALID_INPUT'
+	if "corporate_id" in content and "unique_id" in content :
+		returnValue = 'success' 
+
+	return returnValue
+
+@app.route('/institue/stop_corporate_fetching', methods=['GET', 'POST'])
+def stop_corporate_fetching() :
+	"""
+    input
+    {
+    	"corporate_id":"ins_id"
+    	"unique_id":"unique_id"
+    }
+    """
+    content = request.json
+    errorCode = validateStopCorporateFecthingInput(content)
+
+    if errorCode == 'success' :
+    	corporateCamerasOnStream[topicName] = False
+    else :
+    	print("stop_corporate_fetching : " + errorCode)
+
 def data_dumping_service():
 	while True:
 		time.sleep(60) #wait for 1 minute then upload data in registry
@@ -564,6 +613,8 @@ if __name__ == "__main__":
 	ap.add_argument("-p","--port",required=True)
 	ap.add_argument("-i","--registry_ip",required=True)
 	ap.add_argument("-x","--registry_port",required=True)
+	ap.add_argument("-k", "--kafka_ip", required=True)
+	ap.add_argument("f", "--kafka_port", required=True)
 	args = vars(ap.parse_args())       
 	
 	"""
