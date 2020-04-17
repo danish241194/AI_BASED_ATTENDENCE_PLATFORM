@@ -16,7 +16,8 @@ def add_camera():
 	{
 		"institue_id":1213,
 		"cameras" :[
-					{"camera_id":21323,
+					{
+					"camera_id":21323,
 					"room_id":213
 					},
 					{
@@ -27,9 +28,8 @@ def add_camera():
 	}
     """
     	"""
-    	Generate Unique ID For Every Camera Instance and store it in 
-    	your data base as key=institue id concatenated with room no
-    	and value is ur generated Unique camera id
+    	Generate Unique ID For Every Camera Instance as institueid concatenated with room_no
+    		as   iiit13:sh1
     	"""
     """
 		output

@@ -4,15 +4,32 @@ import json
 import requests
 import threading 
 import time
+import pickle
+from pathlib import Path
+
+
+import os
 app = Flask(__name__)
+
 
 
 @app.route('/store/<service>', methods=['GET', 'POST'])
 def store(service):
-	
+	print("+ REQUEST TO DUMP FROM ",service)
 	content = request.json
 
-	registry_path = "/registry.pickle"
+	registry_path = "registry_data/registry.pickle"
+	print("-\tREQUEST TO DUMP FROM ",service)
+
+	my_file = Path("registry_data")
+	if not my_file.is_dir():
+		os.system("mkdir registry_data")
+		f = open(registry_path,"wb")
+		data = {"nothingadasd":"nothingxxsdsd"}
+		f.write(pickle.dumps(data))
+
+		f.close()
+
 
 	data = pickle.loads(open(registry_path,"rb").read())
 
@@ -22,10 +39,14 @@ def store(service):
 	    f = open(registry_path,"wb")
 	    f.write(pickle.dumps(data))
 	    f.close()
+
+	    print("- RETURNING RESPONSE OK TO ",service)
+
 	    return {"Response":"OK"}
 
 	except:
-	    return {"Response":"ERROR"}
+		print("- RETURNING RESPONSE ERROR TO ",service)
+		return {"Response":"ERROR"}
 
 	"""
 	content
@@ -38,24 +59,32 @@ def store(service):
 
 @app.route('/fetch/<service>')
 def fetch(service):
-    data = pickle.loads(open(registry_path,"rb").read())
+	print("+ REQUEST TO FETCH FROM ",service)
+	registry_path = "registry_data/registry.pickle"
 
-    try:
-    	return data[service]
+	data = pickle.loads(open(registry_path,"rb").read())
 
-    except:
-    	return "ERROR"
+	try:
+		print("+ RETURNING DATA TO ",service)
+		return data[service]
+
+	except:
+		return "ERROR"
 
 free_list = list()
 @app.route('/add_machine', methods=['GET', 'POST'])
 def add_machine():
-	content = request.json
+	print("+ REQUEST TO ADD MACHINE FROM PLATOFRM ADMIN MANAGER")
+	content = (request.json)["machines"]
 	try:
-		for machines in content[machines]:
-			for machine in machines.values():
-				free_list.append(machine)
+		for key in content.keys():
+			free_list.append(content[key])
+			print("-\t ",key," : ",content[key])
+			print("+ RETURNING RESPONSE OK TO PLATFORM ADMIN MANAGER")
+
 		return {"Response":"OK"}
 	except:
+		print("+ RETURNING RESPONSE OK TO PLATFORM ADMIN MANAGER")
 		return {"Response":"ERROR"}
 	'''
 		{
@@ -87,12 +116,14 @@ def add_machine():
 servloc_dict = dict()
 @app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
-    content = request.json
-    print("ok")
 
-    servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] , \
-    "username":content["username"] , "password":content["password"] }
-    '''
+	content = request.json
+	print("+ REQUEST TO ENTER ADDRESS OF ",content["servicename"])
+
+	servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] ,"username":content["username"] , "password":content["password"] }
+	print("\t- ",content["servicename"])
+
+	'''
     	{
 			"servicename":scheduler
 			
@@ -103,21 +134,21 @@ def service_entry():
     		
 
     	}
-    '''
-    '''
+	'''
+	'''
     	which service is running at which location
-    '''
-    '''
+	'''
+	'''
     	return ack
-    '''
+	'''
+	print("+ RETURNING RESPONSE OK")
 
-    return {"Response":"OK/ERROR"}
+	return {"Response":"OK/ERROR"}
+
 @app.route('/get_service_location/<service>')
 def get_service_location(service):
-	try:
-		return servloc_dict[service]
-	except:
-		return "ERROR"
+	print("+ REQUEST TO GET ADDRESS OF SERVICE ",service)
+
 	'''
 		OUTPUT
 		{
@@ -132,40 +163,60 @@ def get_service_location(service):
 		
 		}
 	'''
-	return {"Response":"OK/ERROR"}
-
+	try:
+		print("+ RETURNING ADDRESS",servloc_dict[service])
+		return servloc_dict[service]
+	except:
+		return {"res":"ERROR"}
 
 @app.route('/get_free_list')
 def get_free_list():
-    content = request.json
+	print("+ REQUEST FOR FREE LIST")
 
-    if len(free_list) == 0:
-    	return {"res":"NO_MACHINE_AVAILABLE"}
-    else:
-    	return {"res":"OK","free_list":free_list}
+	if len(free_list) == 0:
+		print("\t- NO MACHINE AVAILABLE")
+		return {"res":"NO_MACHINE_AVAILABLE"}
+	else:
+		print("\t- RETURNING FREE LIST : ",free_list)
+		return {"res":"OK","free_list":free_list}
     
-    '''
+	'''
     	free_list = [{"ip":ip,"port":port"username":username,"password":password},
 					{"ip":ip,"port":port"username":username,"password":password}
     				]
-    '''
+	'''
 
     # return {"res":"OK","free_list":free_list} or {"res":"NO_MACHINE_AVAILABLE"}
 
 
 @app.route('/remove_from_free_list')
 def remove_free_list():
-    content = request.json
-
-    if len(free_list) == 0:
-    	return {"response":"NO_MACHINE_AVAILABLE"}
-    else:
-    	free_list.pop(0)
-    	return {"Response":"OK"}
+	print("+ REQUEST TO REMOVE FIRST MACHINE FROM FREE LIST")
+	if len(free_list) == 0:
+		return {"response":"NO_MACHINE_AVAILABLE"}
+	else:
+		print("\t- REMOVING ......")
+		free_list.pop(0)
+		print("+RETURNING OK")
+		return {"Response":"OK"}
     
-    '''
+	'''
     	remove first machine from free_list
-    '''
+	'''
+@app.route('/display_free_list_and_server_loc')
+def display_free_list_and_server_loc():
+	print("+ REQUEST TO DISPLAY DATA")
+	print("\n##############################################################################################")
+	print("[+] FREE LIST")
+	print(free_list)
+	print("\n[+] SERVER LOCATION")
+	print(servloc_dict)    
+	print("\n##############################################################################################")
+
+	'''
+    	remove first machine from free_list
+	'''
+	return {"ok":"ok"}
 
     
 

@@ -242,7 +242,7 @@ def get_attendence_corporate():
 			"start_date":"12-03-2020"
 			"end_date":"22-04-2020"
 			"effective_time":"YES" or None
-			"condition":{
+			"condition":null{
 				"greater_than":"80"   FOR INDIVIDUAL COURSES
 
 			}
