@@ -179,15 +179,17 @@ def take_new_encodings(id):
 	f.close()
 	return {"res":"ok"}
 
-'''
-	The training code will ask for previous encodings if any to register
-	after that unzip current folder
-	after that train on those photos
-	after that store total encodings
-	after that send back encodings
-	/institute or corporate/encodings
-	tell container i am done
-'''
+
+@app.route('/deployment/service/send_me_course_enrols/<ins_id>/<course_no>')
+def send_me_course_enrols(ins_id,course_no):
+	#path is course/institueid/courseid
+	# data = pickle.loads(open("course/"+str(ins_id)+".pickle","rb").read())
+	# packet = {"enrols":data[course_no]}
+	packet = {"enrols":["salman","johncena","danish"]}
+	
+	return packet
+
+
 
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
