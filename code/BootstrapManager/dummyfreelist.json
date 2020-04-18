@@ -1,0 +1,18 @@
+{
+	"machines":
+				{
+					"machine_1":{
+								"ip":"127.0.0.1",
+								"port":"9872",
+								"username":"xyz",
+								"password":"4546"
+							},
+					"machine_2":{
+								"ip":"127.0.0.1",
+								"port":"9875",
+								"username":"xyz",
+								"password":"4546"
+						}
+				}
+
+}

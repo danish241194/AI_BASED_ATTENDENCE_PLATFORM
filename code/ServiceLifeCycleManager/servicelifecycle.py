@@ -5,21 +5,32 @@ import requests
 import threading 
 import time
 import pickle
+import paramiko
 app = Flask(__name__)
 
 REGISTRY_IP = None
 REGISTRY_PORT = None
 @app.route('/run_service/<service>', methods=['GET', 'POST'])
 def run_service(service):
+	# res = requests.get('http://'+REGISTRY_IP+':'+REGISTRY_PORT+'/get_service_location/'+service)
+	# content = res.json()
+	# ip = content["ip"]
+	# port = content["port"]
 
-    '''
-		    res = requests.get('http://'+REGISTRY_IP+':'+int(REGISTRY_PORT)+'/get_service_location/server_life_cycle')
-		    content = res.json()
-		    ip = content["ip"]
-		    port = content["port"]
+	# res = requests.get('http://'+ip+':'+int(port)+'/assign_machine_for_platform_sevice')
+	# content = res.json()
 
-		    res = requests.get('http://'+ip+':'+int(port)+'/assign_machine_for_platform_sevice')
-		    content = res.json()
+	ssh_client =paramiko.SSHClient()
+	ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	print("yo")
+	ssh_client.connect(REGISTRY_IP,22,username='',password='',timeout = 4)
+	print("yo")
+	ftp_client=ssh_client.open_sftp()
+	ftp_client.put(service+'.py','.')
+	ftp_client.close()
+
+	'''
+		    
 			
 				content = {
 					"ip":ip,
@@ -28,6 +39,7 @@ def run_service(service):
 					"password",password,
 		    			}
 
+			
 		   using "paramiko" copy the service(given) code which will be in the current direct to the remote
 		   machine whose details are in content and also copy machine agent code and run both service file as
 		   well as machineagent file
@@ -43,8 +55,8 @@ def run_service(service):
 		    			}
 		    res = requests.post('http://registryip:registryport/service_entry', json=data)
 		
-    '''
-    return {"Response":data}
+	'''
+	return {"Response":data}
 
 
 def data_dumping_service():
@@ -83,7 +95,9 @@ if __name__ == "__main__":
 			}
 	print("ok1")
 	res = requests.post("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
-	print(res.json())
+	# print(res.json())
 	print("ok2")
 	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler")
-	print(res.json())
+	# print(res.json())
+
+	run_service('registry')
