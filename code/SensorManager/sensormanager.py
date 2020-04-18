@@ -7,6 +7,7 @@ import time
 import os
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka import KafkaProducer, KafkaConsumer
+import json
 
 app = Flask(__name__)
 
@@ -15,55 +16,32 @@ REGISTRY_PORT = None
 KAFKA_IP = None
 KAFKA_PORT = None
 
-institueToCameraPickle = "./institueToCamera.p"
-institueToCamera = {}
-newCamerasAdded = 0
-cameraThreshould = 10
+instituteToCamera = {}
 
-institueToImagePickle = './institueToImage.p'
-institueToImage = {}
-newImageAdded = 0
-ImageThreshould = 10
+instituteToImage = {}
 
 instituteCamerasOnStream = {}
 
 class Camera :
-	def __init__(cameraID) :
+	def __init__(self, cameraID) :
 		self.cameraID = cameraID
 
-	def getCameraID() :
-		return cameraID
-
-def initialiseInstituteCamerasOnStream() :
-	for camera in institueToCamera.keys() : 
-		instituteCamerasOnStream[camera] = False
-
-def loadPickleToDictionary(file, dictionary) :
-	with open(file, 'rb') as fp:
-    	dictionary = pickle.load(fp)
-
-def inititalizeInstituteToCamera() :
-	if(len(institueToCamera) == 0 ) :
-		if(os.path.isfile(institueToCameraPickle)) :
-			loadPickleToDictionary(institueToCameraPickle, institueToCamera)
-			initialiseInstituteCamerasOnStream()
-
-def dumpDictionaryToPickle(dictionary, file) :
-	with open(file, 'wb') as fp:
-    	pickle.dump(dictionary, fp, protocol=pickle.HIGHEST_PROTOCOL)
+	def getCameraID(self) :
+		return self.cameraID
 
 def validateAddCameraInput(content) :
-	returnValue = 'INVALID_INPUT'
-	if 'institue_id' in content :
-		if 'cameras' in content['institue_id'] :
-			if 'camera_id' in content['institue_id']['cameras'] and 'room_id' in content['institue_id']['cameras'] :
-				returnValue = 'sucess' 
-			
-	return returnValue 
+    returnValue = 'INVALID_INPUT'
+    if 'institute_id' in content :
+        if 'cameras' in content :
+            for cameraInstance in content['cameras'] :
+                if 'camera_id' in cameraInstance and 'room_id' in cameraInstance :
+                    returnValue = 'success' 
+            
+    return returnValue 
 
 def ifExist( key, newCamera) :
 	returnValue = 'success'
-	if key in institueToCamera and institueToCamera[key] == newCamera :
+	if key in instituteToCamera and instituteToCamera[key].getCameraID() == newCamera.getCameraID() :
 		returnValue = 'DUPLICATE_ELEMENT' 
 
 	return returnValue
@@ -75,37 +53,32 @@ def createKafkaTopic(topicName) :
 	admin_client.create_topics(new_topics=topic_list, validate_only=False)
 
 
-@app.route('/institue/add_camera', methods=['GET', 'POST'])
-def add_camera():
+@app.route('/institute/add_camera', methods=['GET', 'POST'])
+def add_camera(): 
     content = request.json
 
     errorCode = 'success'
 
     errorCode = validateAddCameraInput(content)
 
-    if(errorCode != 'success') : #add code to update log file
+    if(errorCode != 'success') : 
     	print("add_camera : " + errorCode)
-    	return 
+    	return {"Response" : "ERROR"}
 
-    institueID = content['institue_id']
-
-    inititalizeInstituteToCamera()
+    instituteID = str(content['institute_id'])
 
     for camera in content['cameras'] :
-    	cameraID = institueID + "_" + content['cameras']['room_id'] + "_" content['cameras']['camera_id'] 
-    	keyToCamera = institueID + "_" + content['cameras']['room_id']
-    	camera = Camera(cameraID) 
-    	errorCode = ifExist(keyToCamera, camera)
-    	if errorCode == 'success' :
-    		institueToCamera[keyToCamera] = cameraID 
-    		createKafkaTopic(keyToCamera) 
-    		instituteCamerasOnStream[keyToCamera] = False
-    		newCamerasAdded += 1 
-    		if(newCamerasAdded == cameraThreshould) :
-    			dumpDictionaryToPickle(institueToCamera, institueToCameraPickle)
-    			newCamerasAdded = 0 
-    	else :
-    		print("add_camera : " + errorCode + " for value " + content['cameras']['camera_id'])
+
+        cameraID = instituteID + "_" + str(camera['room_id']) + "_" + str(camera['camera_id'])
+        keyToCamera = instituteID + "_" + str(camera['room_id'])
+        cameraID = Camera(cameraID) 
+        errorCode = ifExist(keyToCamera, cameraID)
+        if errorCode == 'success' :
+            instituteToCamera[keyToCamera] = cameraID
+            createKafkaTopic(keyToCamera) 
+            instituteCamerasOnStream[keyToCamera] = False
+        else :
+            print("add_camera : " + errorCode + " for value " + str(camera['camera_id']))
 
 
 
@@ -113,7 +86,7 @@ def add_camera():
     """
     content
 	{
-		"institue_id":1213,
+		"institute_id":1213,
 		"cameras" :[
 					{
 					"camera_id":21323,
@@ -126,10 +99,10 @@ def add_camera():
 			]
 	}
     """
-    	"""
-    	Generate Unique ID For Every Camera Instance as institueid concatenated with room_no
+    """
+    	Generate Unique ID For Every Camera Instance as instituteid concatenated with room_no
     		as   iiit13:sh1
-    	"""
+    """
     """
 		output
 
@@ -143,12 +116,12 @@ def add_camera():
 
 def validateGetCameraInput(content) :
 	returnValue = 'INVALID_INPUT'
-	if "institue_id" in content and "room_id" in content :
+	if "institute_id" in content and "room_id" in content :
 		returnValue = 'success'
 
 	return returnValue
 
-@app.route('/institue/get_camera_instance', methods=['GET', 'POST'])
+@app.route('/institute/get_camera_instance', methods=['GET', 'POST'])
 def get_camera_instance():
     content = request.json
 
@@ -157,22 +130,19 @@ def get_camera_instance():
     errorCode = validateGetCameraInput(content)
 
     if errorCode != 'success' :
-    	print("get_camera_instance : " + errorCode)
-    	returnValue =  errorCode
+        returnValue =  errorCode
     else :
-	    inititalizeInstituteToCamera()
-	    key = content['institue_id'] + "_" + content["room_id"]
+        key = str(content['institute_id']) + "_" + str(content["room_id"])
+        if key in instituteToCamera:
+            returnValue = instituteToCamera[key].getCameraID()
+        else :
+            returnValue = "Not initialized"
 
-	    if key in institueToCamera :
-			returnValue = institueToCamera[key].getCameraID()
-		else :
-			returnValue = "Not initialized"
-
-	return returnValue
+    return returnValue
     """
     input
     {
-    	"institue_id":"ins id"
+    	"institute_id":"ins id"
     	"room_id":"room id"
     }
     """
@@ -190,35 +160,36 @@ def get_camera_instance():
 	# consumer = KafkaConsumer(bootstrap_servers="KAFKA_IP + ":" + KAFKA_PORT")
 
 
-	"""
+    """
 	definition for kafka producer
-	"""
+    """
 	# while True:
-		"""
+    """
 			if there is reuest for this topic then
 			put latest image for this topic in the kafka topic(unique id) 
-		"""
+    """
 def validateStartFetchingInput(content) :
 	returnValue = 'INVALID_INPUT'
-	if "institue_id" in content and "unique_id" in content :
+	if "institute_id" in content and "unique_id" in content :
 		returnValue = 'success'
 
 	return returnValue
 
 def streamImages(producer, topicName) :
-	instituteCamerasOnStream[topicName] = True
-	lastImageSent = "" 
-	while True :
-		if instituteCamerasOnStream[topicName] :
-			if lastImageSent != institueToImage[topicName] :
-				lastImageSent = institueToImage[topicName]
-				producer.send(topicName, lastImageSent) 
-		else :
-			break
+    instituteCamerasOnStream[topicName] = True
+    lastImageSent = "" 
+    while True :
+        if instituteCamerasOnStream[topicName] :
+            if lastImageSent != instituteToImage[topicName] :
+                lastImageSent = instituteToImage[topicName]
+                data = {"image":lastImageSent}
+                producer.send(topicName, value=data) 
+        else :
+            break
 
-		sleep(5)
+        sleep(5)
 
-@app.route('/institue/start_fetching', methods=['GET', 'POST'])
+@app.route('/institute/start_fetching', methods=['GET', 'POST'])
 def start_fetching():
     content = request.json
 
@@ -226,7 +197,7 @@ def start_fetching():
 
     if errorCode == 'success' :
     	topicName = content["unique_id"]
-    	producer = KafkaProducer(bootstrap_servers=KAFKA_IP + ":" + KAFKA_PORT)
+    	producer = KafkaProducer(bootstrap_servers=["localhost:9092"],value_serializer=lambda x:dumps(x).encode('utf-8'))
     	thread = threading.Thread(target=streamImages, args=(producer, topicName,))
     	thread.start()
 
@@ -235,7 +206,7 @@ def start_fetching():
     """ 
     input
     {
-    	"institue_id":"ins_id"
+    	"institute_id":"ins_id"
     	"unique_id":"unique_id"
     }
     """
@@ -271,11 +242,7 @@ def upload_image(unique_id):
     errorCode = validateUploadImageInput(content)
 
     if(errorCode == 'success'):
-    	institueToImage[unique_id] = content['image']
-    	newImageAdded += 1
-    	if newImageAdded == ImageThreshould :
-    		dumpDictionaryToPickle(institueToImage, institueToImagePickle)
-    		newImageAdded = 0
+    	instituteToImage[unique_id] = content['image']
     else :
     	print("upload_image : " + errorCode)
 
@@ -298,17 +265,17 @@ def upload_image(unique_id):
 
 def validateStopFecthingInput(content) :
 	returnValue = 'INVALID_INPUT'
-	if "institue_id" in content and "unique_id" in content :
+	if "institute_id" in content and "unique_id" in content :
 		errorCode = 'success'
 
 	return returnValue
 
-@app.route('/institue/stop_fetching', methods=['GET', 'POST'])
+@app.route('/institute/stop_fetching', methods=['GET', 'POST'])
 def stop_fetching() :
-	"""
+    """
 	input
     {
-    	"institue_id":"ins_id"
+    	"institute_id":"ins_id"
     	"unique_id":"unique_id"
     }
     """
@@ -316,19 +283,13 @@ def stop_fetching() :
     errorCode = validateStopFecthingInput(content)
 
     if errorCode == 'success' :
-    	instituteCamerasOnStream[topicName] = False
+        instituteCamerasOnStream[topicName] = False
     else :
-    	print("stop_fetching : " + errorCode)
+        print("stop_fetching : " + errorCode)
 
-corporateToCameraPickle = "./corporateToCamera.p"
 corporateToCamera = {}
-newCorporateCamerasAdded = 0
-corporateCameraThreshould = 10
 
-corporateToImagePickle = './corporateToImage.p'
 corporateToImage = {}
-newCorporateImageAdded = 0
-corporateImageThreshould = 10
 
 corporateCamerasOnStream = {}
 
@@ -342,16 +303,6 @@ def validateAddCameraCorporateInput(content) :
 
 	return returnValue
 
-def inititalizeCorporateToCamera() :
-	if(len(corporateToCamera) == 0 ) :
-		if(os.path.isfile(corporateToCameraPickle)) :
-			loadPickleToDictionary(corporateToCameraPickle, corporateToCamera)
-			initialiseCorporateCamerasOnStream()
-
-def initialiseCorporateCamerasOnStream() :
-	for camera in corporateToCamera.keys() : 
-		corporateCamerasOnStream[camera] = False
-
 @app.route('/corporate/add_camera', methods=['GET', 'POST'])
 def add_camera_corporate():
     content = request.json
@@ -359,10 +310,9 @@ def add_camera_corporate():
     errorCode = validateAddCameraCorporateInput(content)
 
     if errorCode == 'success' :
-    	inititalizeCorporateToCamera()
 
-    	keyIN = content["corporate_id"] + "_in"
-    	keyOUT = content["corporate_id"] + "_out"
+    	keyIN = str(content["corporate_id"]) + "_in"
+    	keyOUT = str(content["corporate_id"]) + "_out"
     	inValue = ""
     	outValue = ""
 
@@ -376,19 +326,14 @@ def add_camera_corporate():
     	else :
     		outValue = content["cameras"][1]["camera_id"]
 
-    	corporateToCamera[keyIN] = Camera(inValue)
-    	corporateToCamera[keyOUT] = Camera(outValue)
+    	corporateToCamera[keyIN] = Camera(str(inValue))
+    	corporateToCamera[keyOUT] = Camera(str(outValue))
 
     	createKafkaTopic(keyIN)
     	createKafkaTopic(keyOUT)
 
     	corporateCamerasOnStream[keyIN] = False
     	corporateCamerasOnStream[keyOUT] = False
-
-    	newCorporateCamerasAdded += 2 
-    	if newCorporateCamerasAdded == corporateCameraThreshould :
-    		dumpDictionaryToPickle(corporateToCamera, corporateToCameraPickle)
-    		newCorporateCamerasAdded = 0
     else :
     	print("add_camera_corporate : " + errorCode)
 
@@ -408,12 +353,12 @@ def add_camera_corporate():
 			]
 	}
     """
-    	"""
+    """
     	Generate Unique ID For Every Camera Instance and store it in 
     	your data base as key=corporate_id concatenated with camera_id
     	and value is ur generated Unique camera id and also store whether it
     	is in type or out type
-    	"""
+    """
     """
 		output
 
@@ -427,19 +372,19 @@ def add_camera_corporate():
 
 # def data_fetching_corporate(type,corporate_id,unique_id):
 	# while True:
-		"""
+    """
 			if type == in:
 				get latest data for unique id and put it in corporate_id_in topic
 			else:
 				in corporate_id_out topic
-		"""
+    """
 
 def validateStartFetchingCorporateInput(content) :
-	returnValue = 'INVALID_INPUT'
-	if "corporate_id" in content and "unique_id" in content :
-		returnValue = 'success'
+    returnValue = 'INVALID_INPUT'
+    if "corporate_id" in content and "unique_id" in content :
+        returnValue = 'success'
 
-	return returnValue
+    return returnValue
 
 def streamCorporateImages(producer, topicName) :
 	corporateCamerasOnStream[topicName] = True 
@@ -508,10 +453,6 @@ def upload_corporate_image(unique_id):
 
     if(errorCode == 'success'):
     	corporateToImage[unique_id] = content['image']
-    	newCorporateImageAdded += 1
-    	if newCorporateImageAdded == corporateImageThreshould :
-    		dumpDictionaryToPickle(corporateToImage, corporateToImagePickle)
-    		newCorporateImageAdded = 0
     else :
     	print("upload_corporate_image : " + errorCode)
 
@@ -539,7 +480,7 @@ def validateGetCorporateCameraInput(content) :
 
 	return returnValue
 
-@app.route('/institue/get_corporate_camera_instance', methods=['GET', 'POST'])
+@app.route('/institute/get_corporate_camera_instance', methods=['GET', 'POST'])
 def get_corporate_camera_instance():
     content = request.json
 
@@ -548,18 +489,17 @@ def get_corporate_camera_instance():
     errorCode = validateGetCorporateCameraInput(content)
 
     if errorCode != 'success' :
-    	print("get_corporate_camera_instance : " + errorCode)
-    	returnValue =  errorCode
+        print("get_corporate_camera_instance : " + errorCode)
+        returnValue =  errorCode
     else :
-	    inititalizeInstituteToCamera()
-	    key = content['corporate_id'] + "_" + content["type"]
+        key = str(content['corporate_id']) + "_" + content["type"]
 
-	    if key in corporateToCamera :
-			returnValue = institueToCamera[key].getCameraID()
-		else :
-			returnValue = "Not initialized"
+        if key in corporateToCamera :
+            returnValue = corporateToCamera[key].getCameraID()
+        else :
+            returnValue = "Not initialized"
 
-	return returnValue
+    return returnValue
     """
     input
     {
@@ -584,9 +524,9 @@ def validateStopCorporateFetchingInput(content) :
 
 	return returnValue
 
-@app.route('/institue/stop_corporate_fetching', methods=['GET', 'POST'])
+# @app.route('/institute/stop_corporate_fetching', methods=['GET', 'POST'])
 def stop_corporate_fetching() :
-	"""
+    """
     input
     {
     	"corporate_id":"ins_id"
@@ -604,20 +544,20 @@ def stop_corporate_fetching() :
 def data_dumping_service():
 	while True:
 		time.sleep(60) #wait for 1 minute then upload data in registry
-		data = {"institue":institue_data,"corporate":"corporate_data"}
+		data = {"institute":institute_data,"corporate":"corporate_data"}
 		res = requests.post('http://'+REGISTRY_IP+':'+str(REGISTRY_PORT)+'/store/query_manager', json=data)
 
 
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
-	ap.add_argument("-i","--registry_ip",required=True)
-	ap.add_argument("-x","--registry_port",required=True)
-	ap.add_argument("-k", "--kafka_ip", required=True)
-	ap.add_argument("f", "--kafka_port", required=True)
-	args = vars(ap.parse_args())       
+	# ap.add_argument("-i","--registry_ip",required=True)
+	# ap.add_argument("-x","--registry_port",required=True)
+	# ap.add_argument("-k", "--kafka_ip", required=True)
+	# ap.add_argument("f", "--kafka_port", required=True)
+	# args = vars(ap.parse_args())       
 	
-	"""
+    """
 	REGISTRY_IP = args["registry_ip"]
 	REGISTRY_PORT = args["registry_port"]
 
@@ -628,3 +568,5 @@ if __name__ == "__main__":
 	t1.start()
 	"""
 	app.run(debug=True,port=int(args["port"])) 
+
+    
