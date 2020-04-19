@@ -45,7 +45,7 @@
                             <input type="number" class="form-control" id="percentageid" placeholder="Attendance percentage" name="criterion" value="0">
                             <small id="percentageHelp" class="form-text text-muted">Attendance criterion in percentage <b style="color: black;">(if any)</b></small>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" onclick="removeStudents()">Remove</button>
+                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;">Query</button>
                     </form>
                 </div>
                 {% with messages = get_flashed_messages() %}
@@ -53,9 +53,6 @@
                             {% if message %}
                                 {% if message == "incomplete" %}
                                     <script>alert("Missing fields")</script>
-                                {% endif %}
-                                {% if message == "Course registered" %}
-                                    <script>alert("Course successfully registered")</script>
                                 {% endif %}
                             {% endif %}
                         {% endfor %}

@@ -93,12 +93,28 @@ def retrieveListFromString(str):
         students.append(temp)
     return students
 
+@app.route("/addcamera/<id>",methods=['POST'])
+def addCamera(id):
+    room = request.form['room']
+    camera_id = request.form['camera_id']
+    if not room or not camera_id:
+        flash("Missing fields")
+        return render_template("institutehome.html",user = id)
+    
 
-# def addCamera(id):
 
 # def addStudents(id):
 
-# def removeStudents(id):
+@app.route("/removestudents/<id>",methods=['POST'])
+def removeStudents(id):
+    students_string = request.form['removelist']
+    if not students_string:
+        flash("Missing fields")
+        return render_template("institutehome.html",user = id)
+    print(students_string)
+    students = retrieveListFromString(students_string)
+    print (students)
+    return render_template("institutehome.html",user = id)
 
 
 @app.route("/addcourse/<id>", methods=['POST'])
@@ -150,7 +166,7 @@ def convertDate(date):
             date[i]='-'
     return date
 
-@app.route("/iqm/institutequery/<id>",methods=['POST','GET'])
+@app.route("/institutequery/<id>",methods=['POST','GET'])
 def instituteQuery(id):
     if not request.form :
         return render_template("institutequery.html",user=id )
