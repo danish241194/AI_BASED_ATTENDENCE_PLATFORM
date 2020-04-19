@@ -21,18 +21,21 @@
                         <p for="exampleFormControlFile1">Upload zip file</p>
                         <input type="file" class="form-control-file" id="exampleFormControlFile1">
                     </div>
-                    <button type="button" class="btn btn-primary" style="float: right; background-color: #4d94ff; margin-top: 5%;" onclick="addStudents()">Add</button>
+                    <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff; margin-top: 5%;" onclick="addStudents()">Add</button>
                 </div>
 
                 <div class="container" style="height:40%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
                     <p style="text-align: center;"><b> Add camera</b></p>
-                    <div class="form-group" style="width: 75%; margin-left: 15%;margin-top: 15%;">
-                        <input type="text" class="form-control" placeholder="Room number" id="camera_room_id" name="room">
-                    </div>
-                    <div class="form-group" style="width: 75%; margin-left: 15%;">
-                        <input type="text" class="form-control" placeholder="Camera id" id="camera_id" name="camera_id">
-                    </div>
-                    <button type="button" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" onclick="addCamera()">Add</button>
+                    <form action="/addcamera/{{user}}" method="POST">
+                        <div class="form-group" style="width: 75%; margin-left: 15%;margin-top: 15%;">
+                            <input type="text" class="form-control" placeholder="Room number" id="camera_room_id" name="room">
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="text" class="form-control" placeholder="Camera id" id="camera_id" name="camera_id">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" >Add</button>
+                    </form>
+                    
                 </div>
                 
             </div>
@@ -41,10 +44,12 @@
                 <div class="container" style="height:40%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
                     <p style="text-align: center;"><b> Remove students</b></p>
                     <p style="text-align: center;margin-top: 15%;">comma seperated Roll numbers</p>
-                    <div class="form-group" style="width: 75%; margin-left: 15%;">
-                        <input type="text" class="form-control" placeholder="Enter Roll numbers" id="remove_studentlist_id" name="removelist">
-                    </div>
-                    <button type="button" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" onclick="removeStudents()">Remove</button>
+                    <form action="/removestudents/{{user}}" method="POST">
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="text" class="form-control" placeholder="Enter Roll numbers" id="remove_studentlist_id" name="removelist">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" >Remove</button>
+                    </form>
                 </div>
                 
                 <p style="text-align: center; margin-top: 10%;"><a style=" color: #ff3333;" href="/iqm/{{user}}">Retrieve attendance (queries)</a></p>                
@@ -100,7 +105,6 @@
                             <div class="checkbox">
                                 <label><input type="checkbox" value="saturday" name="saturday" id="saturday_id">Saturday</label>
                             </div> 
-                            <!-- <p name="user" style="visibility: hidden;">{{ user }}</p>    -->
                         </div>
                         <div class="form-group" style="width: 75%; margin-left: 15%;">
                             <input type="time" class="form-control" placeholder="Attendance time" id="time_id" name="time">
