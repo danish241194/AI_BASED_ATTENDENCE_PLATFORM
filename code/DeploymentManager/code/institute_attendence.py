@@ -13,6 +13,8 @@ import io
 from kafka import KafkaConsumer
 import numpy
 import numpy as np
+from datetime import datetime
+
 
 def detect_students(attendence,course_enrolled_list,data,frame):
 	print("+ Finding matches")
@@ -37,14 +39,16 @@ def detect_students(attendence,course_enrolled_list,data,frame):
 DEPLOYMENT_IP = "localhost"
 DEPLOYMENT_PORT = "5003"
 SERVERLCM_IP = "localhost"
-SERVERLCM_PORT = "5001"
+SERVERLCM_PORT = "3001"
 SENSOR_MANAGER_IP = "localhost"
 SENSOR_MANAGER_PORT = "5004"
+QUERY_MANAGER_IP = "localhost"
+QUERY_MANAGER_PORT = "9874"
 
 
 
 ap = argparse.ArgumentParser()
-# ap.add_argument("-c","--container_id",required=True)
+ap.add_argument("-c","--container_id",required=True)
 # ap.add_argument("-o","--org",required=True)
 ap.add_argument("-d","--institute_id",required=True)
 ap.add_argument("-r","--room_id",required=True)
@@ -119,6 +123,12 @@ res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/instit
 print("ATTENDENCE ",attendence)
 
 # send dictionary of all present students to query manager
+query_manager_data = {
+		"institute_id": args["institute_id"],
+		"course": args["course_no"],
+		"attendance": attendence,
+		"date":str(datetime.today().strftime('%d-%m-%Y'))
+	}
+res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])
 
-# res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])
-
+req = requests.post("http://localhost:"+QUERY_MANAGER_PORT+"/institute/add_attendance",json=query_manager_data)

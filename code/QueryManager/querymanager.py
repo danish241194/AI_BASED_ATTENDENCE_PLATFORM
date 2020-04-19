@@ -53,6 +53,7 @@ REGISTRY_IP = None
 REGISTRY_PORT = None
 @app.route('/institute/add_attendance', methods=['GET', 'POST'])
 def add_attendance():
+	global institute_attendance
 	content = request.json
 	"""
 	content
@@ -67,7 +68,7 @@ def add_attendance():
 		"date":"DD-MM-YYYY"
 	}
 	"""
-	content_dict = json.loads(content)
+	content_dict = content
 
 	ins_id = content_dict["institute_id"]
 	course = content_dict["course"]
@@ -82,10 +83,15 @@ def add_attendance():
 	institute_attendance[ins_id][course][date] = student_attendance 
 
 	return {"Response":"OK"}
-
+@app.route('/institute/show')
+def show():
+	global institute_attendance
+	print(institute_attendance)
+	return {"Response":"OK"}
 
 @app.route('/institute/get_attendance', methods=['GET', 'POST'])
 def get_attendance():
+	global institute_attendance
 	content = request.json
 	"""
 	input
@@ -136,7 +142,7 @@ def get_attendance():
 	}
 	
 	"""
-	content_dict = json.loads(content)
+	content_dict = content
 
 	ins_id = content_dict["institute_id"]
 	course_list = content_dict["query"]["courses"]
@@ -399,8 +405,8 @@ def data_dumping_service():
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
-	ap.add_argument("-i","--registry_ip",required=True)
-	ap.add_argument("-x","--registry_port",required=True)
+	# ap.add_argument("-i","--registry_ip",required=True)
+	# ap.add_argument("-x","--registry_port",required=True)
 	args = vars(ap.parse_args())       
 	
 	"""

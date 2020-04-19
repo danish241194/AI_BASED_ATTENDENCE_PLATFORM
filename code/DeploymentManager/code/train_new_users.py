@@ -8,7 +8,7 @@ import json
 DEPLOYMENT_IP = "localhost"
 DEPLOYMENT_PORT = "5003"
 SERVERLCM_IP = "localhost"
-SERVERLCM_PORT = "5001"
+SERVERLCM_PORT = "3001"
 ap = argparse.ArgumentParser()
 ap.add_argument("-i","--dataset",required=True)
 ap.add_argument("-c","--container_id",required=True)
@@ -38,7 +38,6 @@ for(i,imagePath) in enumerate(imagePaths):
 
 res = requests.get("http://"+DEPLOYMENT_IP+":"+DEPLOYMENT_PORT+"/deployment/service/send_me_encodings/"+args["id"])
 
-print("old encodings ",res.json())
 data = res.json()
 if(data["res"]=="new"):
 	data["res"]="old"
@@ -46,6 +45,6 @@ if(data["res"]=="new"):
 else:
 	data["encodings"].extend(knownEncodings)
 	data["names"].extend(knownNames)
-print("new encodings ",data)
+print("new encodings ",data["names"])
 res = requests.post("http://"+DEPLOYMENT_IP+":"+DEPLOYMENT_PORT+"/deployment/service/take_new_encodings/"+args["id"],json=data)
 res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])

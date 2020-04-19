@@ -15,6 +15,8 @@ app = Flask(__name__)
 REGISTRY_IP = None
 REGISTRY_PORT = None
 
+deployment_manager_ip="localhost"
+deployment_manager_port = 5003
 class Scheduler:
     def __init__(self):   
         self.main_service_id_dict={}
@@ -27,7 +29,8 @@ class Scheduler:
 
     def send_request_to_deployment_manager(self,institute_id,attendence_minutes,room_id,course_no):
         response = {"org":"institute","institute_id":institute_id,"attendence_minutes":attendence_minutes,"room_id":room_id,"course_no":course_no}
-        #res = requests.post('http://'+deployment_manager_ip+':'+str(deployment_manager_port)+'/deployment/service/start', json=response)
+        print("SENDING REQUEST TO DEP. MANAGER TO START ATTENDENCE")
+        res = requests.post('http://'+deployment_manager_ip+':'+str(deployment_manager_port)+'/deployment/service/start_attendence', json=response)
     
     def run(self):
         t1 = threading.Thread(target=self.pending_jobs) 
@@ -40,7 +43,7 @@ class Scheduler:
        
 
     def schedule(self,request_):
-        institute_id = request_["institue_id"]
+        institute_id = request_["institute_id"]
         day = request_["day"]
         start_time = request_["start_time"]
         attendence_minutes = request_["attendence_minutes"]
@@ -70,6 +73,7 @@ class Scheduler:
             job_id = schedule.every().thursday.at(start_time).do( self.run_service,((institute_id,attendence_minutes,room_id,course_no)))
         elif(day=="friday"):
             job_id = schedule.every().friday.at(start_time).do( self.run_service,((institute_id,attendence_minutes,room_id,course_no)))
+        elif(day=="saturday"):
 
             job_id = schedule.every().saturday.at(start_time).do( self.run_service,((institute_id,attendence_minutes,room_id,course_no)))
         else:
@@ -80,18 +84,18 @@ class Scheduler:
 
 
 
-@app.route('/schedule/cancelSchedule', methods=['GET', 'POST'])
-def schedule_service():
-    content = request.json
-    '''
-    "schedule_instance_id":"schedule_instance_id"
+# @app.route('/schedule/cancelSchedule', methods=['GET', 'POST'])
+# def schedule_service():
+#     content = request.json
+#     '''
+#     "schedule_instance_id":"schedule_instance_id"
    
-    ""
-    '''
-    job_id = sch.scheduling_ids[content["schedule_instance_id"]]
-    schedule.cancel_job(job_id)
-    del sch.scheduling_ids[content["schedule_instance_id"]]
-    return {"result":"OK"}  
+#     ""
+#     '''
+#     job_id = sch.scheduling_ids[content["schedule_instance_id"]]
+#     schedule.cancel_job(job_id)
+#     del sch.scheduling_ids[content["schedule_instance_id"]]
+#     return {"result":"OK"}  
 
 @app.route('/schedule/startSchedule', methods=['GET', 'POST'])
 def schedule_service():
@@ -106,20 +110,21 @@ def schedule_service():
     ""
     '''
     
-    result,schedule_instance_id = sch.schedule(scheduling_request)
+    result,schedule_instance_id = sch.schedule(content)
 
     return {"result":"OK","schedule_instance_id":schedule_instance_id}
+
 sch = None
         
             
 if __name__ == "__main__": 
     ap = argparse.ArgumentParser()
     ap.add_argument("-p","--port",required=True)
-    ap.add_argument("-i","--registry_ip",required=True)
-    ap.add_argument("-x","--registry_port",required=True)
+    # ap.add_argument("-i","--registry_ip",required=True)
+    # ap.add_argument("-x","--registry_port",required=True)
     args = vars(ap.parse_args())          
-    REGISTRY_IP = args["registry_ip"]
-    REGISTRY_PORT = int(args["registry_port"])
+    # REGISTRY_IP = args["registry_ip"]
+    # REGISTRY_PORT = int(args["registry_port"])
     Myport = args["port"]
     sch = Scheduler()
     sch.run()
