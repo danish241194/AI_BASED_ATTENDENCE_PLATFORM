@@ -60,6 +60,7 @@ def createKafkaTopic(topicName) :
 
 @app.route('/institute/add_camera', methods=['GET', 'POST'])
 def add_camera(): 
+    print("+ REQUEST TO ADD INSTITUTE CAMERA")
     global instituteToCamera,instituteCamerasOnStream
     content = request.json
 
@@ -68,7 +69,6 @@ def add_camera():
     errorCode = validateAddCameraInput(content)
 
     if(errorCode != 'success') : 
-        print("add_camera : " + errorCode)
         return {"Response" : "ERROR"}
 
     instituteID = str(content['institute_id'])
@@ -256,7 +256,6 @@ def upload_image(unique_id):
 
     if(errorCode == 'success'):
         instituteToImage[unique_id] = content['image']
-        print("IMAGE UPLOADED",type(instituteToImage[unique_id]))
     else :
         print("upload_image : " + errorCode)
 

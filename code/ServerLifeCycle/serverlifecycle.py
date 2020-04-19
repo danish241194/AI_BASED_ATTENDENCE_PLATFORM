@@ -20,6 +20,7 @@ new_machine["password"]="password"
 users_containers_details = [new_machine]
 @app.route('/serverlcm/de_allocate_user_machine/<container_id>')
 def de_allocate_user_machine(container_id):
+	print("REQUEST TO DEALLOCATE")
 	index = int(container_id)
 	users_containers_load[index]-=1
 	return {"res":"ok"}

@@ -56,14 +56,14 @@ def deploy_attendence():
 		ssh_client.exec_command("mkdir "+folder)
 
 		ftp_client=ssh_client.open_sftp()
-		ftp_client.put("code/institue_attendence_automatic.py",folder+"/institue_attendence_automatic.py")
+		ftp_client.put("code/institute_attendence.py",folder+"/institute_attendence_automatic.py")
 		ftp_client.close()
 
 		print("\t\t* COPIED ATTENDENCE CODE")
 
-		arguments = "--container_id "+str(container_id)+" --institue_id "+req_content["institute_id"] +" --room_id "+req_content["room_id"] +" --course_no "+req_content["course_no"] +" --attendence_minutes "+req_content["attendence_minutes"]
-
-		ssh_client.exec_command("python3 "+folder+"/institue_attendence_automatic.py "+arguments)
+		arguments = "--container_id "+str(container_id)+" --institute_id "+req_content["institute_id"] +" --room_id "+req_content["room_id"] +" --course_no "+req_content["course_no"] +" --attendence_minutes "+str(req_content["attendence_minutes"])
+		print(arguments)
+		ssh_client.exec_command("python3 "+folder+"/institute_attendence_automatic.py "+arguments)
 
 		print("\t\t* EXECUTED CODE")
 
@@ -157,8 +157,8 @@ def train_users():
 
 	
 	arguments = "--dataset "+folder+"/"+content["zip_location"]+" --container_id "+str(container_id)+" --org "+content["org"]+" --id "+content["id"] 
-
-	ssh_client.exec_command("python3 "+folder+"/train_new_users.py "+arguments)
+	print(arguments)
+	ssh_client.exec_command("python3.6 "+folder+"/train_new_users.py "+arguments)
 
 	print("\t- EXECUTED CODE")
 
@@ -189,7 +189,37 @@ def send_me_course_enrols(ins_id,course_no):
 	
 	return packet
 
+@app.route('/deployment/service/remove_user', methods=['GET', 'POST'])
+def remove_user():
+	'''
+		input
+		{
+			{
+		"institute_id":"iiit123",
+		"roll_number":"204820101"
 
+		}
+	'''
+	print("+ REQUEST TO REMOVE USER")
+	content = request.json
+	data = pickle.loads(open("encodings/"+content["institute_id"]+".pickle","rb").read())
+	encodings = data["encodings"]
+	names = data["names"]
+	new_encodings=[]
+	new_names = []
+	for i in range(len(encodings)):
+		name = names[i]
+		if name == content["roll_number"]:
+			continue
+		new_encodings.append(encodings[i])
+		new_names.append(names[i])
+	data = {"encodings":new_encodings,"names":new_names}
+	print("+ Total New Encodings : ",len(new_encodings))
+	print("+ Dumping New Encodings")
+	f = open("encodings/"+content["institute_id"]+".pickle","wb")
+	f.write(pickle.dumps(data))
+	f.close()
+	return {"res":"ok"}
 
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
