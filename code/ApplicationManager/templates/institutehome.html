@@ -46,6 +46,20 @@
                     </div>
                     <button type="button" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" onclick="removeStudents()">Remove</button>
                 </div>
+                
+                <p style="text-align: center; margin-top: 10%;"><a style=" color: #ff3333;" href="/iqm/{{user}}">Retrieve attendance (queries)</a></p>                
+
+                <!-- <div class="container" style="height:40%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
+                    
+                    <div class="form-group" style="width: 75%; margin-left: 15%;margin-top: 15%;">
+                        <input type="text" class="form-control" placeholder="Room number" id="camera_room_id" name="room">
+                    </div>
+                    <div class="form-group" style="width: 75%; margin-left: 15%;">
+                        <input type="text" class="form-control" placeholder="Camera id" id="camera_id" name="camera_id">
+                    </div>
+                    <button type="button" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" onclick="addCamera()">Add</button>
+                </div> -->
+
             </div>
             <div class="col-sm-4" style="height: 100%; ">
 
@@ -104,7 +118,9 @@
                                 {% if message == "Missing fields" %}
                                     <script>alert("Missing fields")</script>
                                 {% endif %}
-                                
+                                {% if message == "Course registered" %}
+                                    <script>alert("Course successfully registered")</script>
+                                {% endif %}
                             {% endif %}
                         {% endfor %}
                     {% endwith %}
