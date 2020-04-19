@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Register user</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+
+<body style="height: 100%; width: 100%;background-color:#f2f2f2 ;">
+    <script src="../static/js/register.js"></script>
+    <script type="text/javascript" src="../static/jquery-3.5.0.js"></script>
+
+    <div class="container" style="height: 100%; width: 100%;">
+        <div class="row" style="height: 100%; width: 100%;">
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+                <div class="container" style="height: 55%; width: 100%; margin-top: 50%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
+                    <p style="text-align: center; color: #4d94ff; font-size: 15px; margin-bottom: 6%;">Registration form</p>
+                    <form action="/registeruser" method="POST">
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <select class="form-control" id="type_id" text="ASds">
+                                <option selected disabled ><p style="color: grey;">Type</p></option>
+                                <option value="institute">Institue</option>
+                                <option value="organization">Organizations</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="text" class="form-control" placeholder="Name" id="name_id" name="name">
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="text" class="form-control"  placeholder="User ID" id="user_id" name="userid">
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="email" class="form-control" placeholder="Email" id="email_id" name="email">
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="password" class="form-control" placeholder="Password" id="password_id" name="password">
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <input type="text" class="form-control"  placeholder="Address" id="address_id" name="address">
+                        </div>
+                        <div class="form-group" style="width: 75%; margin-left: 15%;">
+                            <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;"   id="register_id" onclick="registerClicked()">Register</button>
+                        </div>
+                    </form> 
+                    {% with messages = get_flashed_messages() %}
+                        {% for message in messages %}
+                            {% if message %}
+                                {% if message == "incomplete" %}
+                                    <script>alert("Fill all fields")</script>
+                                {% else %}
+                                    <script>alert("Userid already exists")</script>
+                                {% endif %}    
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %} 
+                </div>
+                
+            </div>
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

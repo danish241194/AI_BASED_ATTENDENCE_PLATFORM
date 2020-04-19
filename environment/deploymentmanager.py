@@ -184,8 +184,8 @@ def take_new_encodings(id):
 def send_me_course_enrols(ins_id,course_no):
 	#path is static/data/institutes/ins_id/course/courseid.pickle
 	data = pickle.loads(open("static/data/institutes/"+ins_id+"/courses/"+course_no+".pickle","rb").read())
-	# packet = {"enrols":data["students"]}
-	packet = {"enrols":["salman","johncena","danish"]}
+	packet = {"enrols":data["students"]}
+	# packet = {"enrols":["salman","johncena","danish"]}
 	
 	return packet
 
