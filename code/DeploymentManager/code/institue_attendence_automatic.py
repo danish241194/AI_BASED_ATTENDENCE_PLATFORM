@@ -1,1 +1,0 @@
-print("This is automatic attendence code")

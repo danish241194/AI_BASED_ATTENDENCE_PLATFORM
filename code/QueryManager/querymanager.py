@@ -287,6 +287,7 @@ def get_attendance_corporate():
 		"corporate_id":1213,
 		"ids":[emp_no_1,emp_no_2] OR ["ALL"]
 		"query":{
+
 			"start_date":"12-03-2020",
 			"end_date":"22-04-2020",
 			"effective_time": "hh:mm:ss" or null (denoting the duration that an employee needs to be in the office),
