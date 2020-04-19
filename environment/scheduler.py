@@ -30,7 +30,7 @@ class Scheduler:
     def send_request_to_deployment_manager(self,institute_id,attendence_minutes,room_id,course_no):
         response = {"org":"institute","institute_id":institute_id,"attendence_minutes":attendence_minutes,"room_id":room_id,"course_no":course_no}
         print("SENDING REQUEST TO DEP. MANAGER TO START ATTENDENCE")
-        # res = requests.post('http://'+deployment_manager_ip+':'+str(deployment_manager_port)+'/deployment/service/start_attendence', json=response)
+        res = requests.post('http://'+deployment_manager_ip+':'+str(deployment_manager_port)+'/deployment/service/start_attendence', json=response)
     
     def run(self):
         t1 = threading.Thread(target=self.pending_jobs) 

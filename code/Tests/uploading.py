@@ -8,7 +8,7 @@ import time
 def upload_image(img):
 	with open(img,"rb") as image:
 		b64string = base64.b64encode(image.read())
-		req = requests.post("http://localhost:5004/upload_image/iiit_123_test_room_123_test123",json={"image":b64string})
+		req = requests.post("http://localhost:5004/upload_image/iiit_sh1_cam123",json={"image":b64string})
 		print(req.json())
 	return
 

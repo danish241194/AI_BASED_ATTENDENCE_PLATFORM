@@ -46,7 +46,7 @@ QUERY_MANAGER_IP = "localhost"
 QUERY_MANAGER_PORT = "9874"
 
 
-
+	
 ap = argparse.ArgumentParser()
 ap.add_argument("-c","--container_id",required=True)
 # ap.add_argument("-o","--org",required=True)
@@ -79,12 +79,15 @@ for name in course_enrolled_students:
 	attendence[name]=0
 
 
+
+
 #ask for kafkatopic
 
 res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/institute/get_camera_instance",json={"institute_id":args["institute_id"],"room_id":args["room_id"]})
 kafka_topic = res.json()["topic"]
 print("kafka_topic ",kafka_topic)
 # kafka_topic="input_to_camera"
+
 
 #call start fetching
 res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/institute/start_fetching",json={"institute_id":args["institute_id"],"unique_id":kafka_topic})
@@ -95,9 +98,7 @@ consumer  = KafkaConsumer(
 	enable_auto_commit=True,
 	group_id="my-group")
 
-consumer.poll()
-#go to end of the stream
-consumer.seek_to_end()
+
 secs = 0
 for message in consumer:
 	# print("message ",message,"value ",message.value)
@@ -114,11 +115,13 @@ for message in consumer:
 	print(len(data["encodings"]))
 	
 	detect_students(attendence,course_enrolled_students,data,frame)
+	
 	if int(secs/60)>=int(args["attendence_minutes"]):
 		break
 
 #stop fetching data
 res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/institute/stop_fetching",json={"institute_id":args["institute_id"],"unique_id":kafka_topic})
+
 
 print("ATTENDENCE ",attendence)
 
@@ -129,6 +132,7 @@ query_manager_data = {
 		"attendance": attendence,
 		"date":str(datetime.today().strftime('%d-%m-%Y'))
 	}
+
 res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])
 
 req = requests.post("http://localhost:"+QUERY_MANAGER_PORT+"/institute/add_attendance",json=query_manager_data)

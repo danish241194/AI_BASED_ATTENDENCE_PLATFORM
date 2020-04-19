@@ -40,11 +40,11 @@ res = requests.get("http://"+DEPLOYMENT_IP+":"+DEPLOYMENT_PORT+"/deployment/serv
 
 data = res.json()
 if(data["res"]=="new"):
-	data["res"]="old"
 	data = {"res":"old","encodings":knownEncodings,"names":knownNames}
 else:
 	data["encodings"].extend(knownEncodings)
 	data["names"].extend(knownNames)
-print("new encodings ",data["names"])
+print("new encodings keys" ,data.keys())
+
 res = requests.post("http://"+DEPLOYMENT_IP+":"+DEPLOYMENT_PORT+"/deployment/service/take_new_encodings/"+args["id"],json=data)
 res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])

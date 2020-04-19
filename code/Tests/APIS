@@ -19,3 +19,6 @@ ADD ATTENDENCE
 req = requests.post("http://localhost:9874/institute/add_attendance",json={"institute_id":"iiit","course":"cs123","attendance":{"danish":1,"yunus":0},"date":"25-11-1994"})
 
 GET ATTENDENCE
+
+
+
