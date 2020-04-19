@@ -6,6 +6,7 @@ import threading
 import time
 import pickle
 import paramiko
+import os
 app = Flask(__name__)
 
 REGISTRY_IP = None
@@ -22,11 +23,23 @@ def run_service(service):
 
 	ssh_client =paramiko.SSHClient()
 	ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-	print("yo")
-	ssh_client.connect(REGISTRY_IP,22,username='',password='',timeout = 4)
-	print("yo")
+	ssh_client.connect(REGISTRY_IP,22,username='tayal',password='2357',timeout = 4)
 	ftp_client=ssh_client.open_sftp()
-	ftp_client.put(service+'.py','.')
+	localFile = service+'.py'
+
+	remotePath = '~/Downloads'
+	# ssh_client.exec_command("mkdir -p " +remotePath)
+
+	print("yo")
+	stdin,stdout,stderr=ssh_client.exec_command("ls")
+	print(stdout.readlines())
+	
+
+	if os.path.isfile(localFile):
+		ftp_client.put(localFile, remotePath)
+	else:
+		raise IOError('Could not find localFile %s !!' % localFile)
+
 	ftp_client.close()
 
 	'''
@@ -94,10 +107,10 @@ if __name__ == "__main__":
 			"password":"password"
 			}
 	print("ok1")
-	res = requests.post("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
+	# res = requests.post("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
 	# print(res.json())
 	print("ok2")
-	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler")
+	# res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler")
 	# print(res.json())
 
-	run_service('registry')
+	run_service('querymanager')
