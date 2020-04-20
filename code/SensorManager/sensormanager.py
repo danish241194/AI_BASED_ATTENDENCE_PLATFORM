@@ -41,13 +41,6 @@ def validateAddCameraInput(content) :
             
     return returnValue 
 
-def ifExist( key, newCamera) :
-    global instituteToCamera
-    returnValue = 'success'
-    if key in instituteToCamera and instituteToCamera[key].getCameraID() == newCamera.getCameraID() :
-        returnValue = 'DUPLICATE_ELEMENT' 
-
-    return returnValue
 
 def createKafkaTopic(topicName) :
     try:
@@ -77,10 +70,9 @@ def add_camera():
 
         cameraID = instituteID + "_" + str(camera['room_id']) + "_" + str(camera['camera_id'])
         keyToCamera = instituteID + "_" + str(camera['room_id'])
-        cameraID = Camera(cameraID) 
-        errorCode = ifExist(keyToCamera, cameraID)
         if errorCode == 'success' :
             instituteToCamera[keyToCamera] = cameraID
+            print("keyToCamera ",keyToCamera," unique key ",cameraID)
             createKafkaTopic(keyToCamera) 
             instituteCamerasOnStream[keyToCamera] = False
         else :
@@ -140,8 +132,9 @@ def get_camera_instance():
         returnValue =  errorCode
     else :
         key = str(content['institute_id']) + "_" + str(content["room_id"])
+        print("get camera instance for key ",key)
         if key in instituteToCamera.keys():
-            returnValue = instituteToCamera[key].getCameraID()
+            returnValue = instituteToCamera[key]
         else :
             returnValue = "Not initialized"
 
@@ -187,7 +180,7 @@ def streamImages(producer, topicName) :
     instituteCamerasOnStream[topicName] = True
     lastImageSent = "" 
     while True :
-        print("Fetching Image")
+        # print("Fetching Image")
         if instituteCamerasOnStream[topicName] :
             if lastImageSent != instituteToImage[topicName] :
                 print("PUSHING NEW IMAGE")
@@ -248,7 +241,7 @@ def validateUploadImageInput(content) :
 @app.route('/upload_image/<unique_id>', methods=['GET', 'POST'])
 def upload_image(unique_id):
     global instituteToImage
-    print("REQUEST TO UPLOAD IMAGE FOR CAMERA ",unique_id)
+    # print("REQUEST TO UPLOAD IMAGE FOR CAMERA ",unique_id)
     content = request.json
 
     errorCode = 'success'
@@ -273,7 +266,7 @@ def upload_image(unique_id):
     returnValue = {"Response" : "ERROR"}
     if errorCode == 'success' :
         returnValue = {"Response" : "OK"}
-    print(returnValue)
+    # print(returnValue)
     return returnValue
 
 

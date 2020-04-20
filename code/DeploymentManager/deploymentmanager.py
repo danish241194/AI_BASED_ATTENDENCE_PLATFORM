@@ -161,7 +161,7 @@ def train_users():
 	ssh_client.exec_command("python3.6 "+folder+"/train_new_users.py "+arguments)
 
 	print("\t- EXECUTED CODE")
-
+	os.system("rm -r images/"+content["zip_location"])
 	ssh_client.close()
 	return {"res":"ok"}
 
@@ -184,19 +184,19 @@ def take_new_encodings(id):
 def send_me_course_enrols(ins_id,course_no):
 	#path is static/data/institutes/ins_id/course/courseid.pickle
 	data = pickle.loads(open("static/data/institutes/"+ins_id+"/courses/"+course_no+".pickle","rb").read())
-	# packet = {"enrols":data["students"]}
-	packet = {"enrols":["salman","johncena","danish"]}
+	packet = {"enrols":data["students"]}
+	# packet = {"enrols":["salman","johncena","danish"]}
 	
 	return packet
 
-@app.route('/deployment/service/remove_user', methods=['GET', 'POST'])
+@app.route('/deployment/service/remove_users', methods=['GET', 'POST'])
 def remove_user():
 	'''
 		input
 		{
 			{
 		"institute_id":"iiit123",
-		"roll_number":"204820101"
+		"roll_number":["204820101","212"]
 
 		}
 	'''
@@ -209,11 +209,11 @@ def remove_user():
 	new_names = []
 	for i in range(len(encodings)):
 		name = names[i]
-		if name == content["roll_number"]:
+		if name in content["roll_numbers"]:
 			continue
 		new_encodings.append(encodings[i])
 		new_names.append(names[i])
-	data = {"encodings":new_encodings,"names":new_names}
+	data = {"res":"old","encodings":new_encodings,"names":new_names}
 	print("+ Total New Encodings : ",len(new_encodings))
 	print("+ Dumping New Encodings")
 	f = open("encodings/"+content["institute_id"]+".pickle","wb")

@@ -51,7 +51,7 @@ class Scheduler:
         course_no = request_["course_no"]
 
         '''
-            "institute_id":"ins id"
+            "institue_id":"ins id"
             "room_id":"room id"
             "course_no":"cs1234"
             "day":"monday"
