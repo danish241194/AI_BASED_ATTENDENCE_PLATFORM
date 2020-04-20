@@ -89,6 +89,7 @@ def show():
 	print(institute_attendance)
 	return {"Response":"OK"}
 
+
 @app.route('/institute/get_attendance', methods=['GET', 'POST'])
 def get_attendance():
 	global institute_attendance
@@ -230,9 +231,15 @@ corporate_attendance = {
 '''
 
 corporate_attendance = {}
+@app.route('/corporate/show')
+def show_corp():
+	global corporate_attendance
+	print(corporate_attendance)
+	return {"Response":"OK"}
 
 @app.route('/corporate/add_attendance', methods=['GET', 'POST'])
 def add_attendance_corporate():
+	global corporate_attendance
 	content = request.json
 	"""
 	content
@@ -244,8 +251,8 @@ def add_attendance_corporate():
 		"time":"hh:mm:ss"
 	}
 	"""
-	content_dict = json.loads(content)
-
+	content_dict = content
+	print(content)
 	corporate_id = content_dict["corporate_id"]
 	timestamp_type = content_dict["type"]
 	empid_list = content_dict["ids"]
@@ -284,6 +291,7 @@ def add_attendance_corporate():
 
 @app.route('/corporate/get_attendance', methods=['GET', 'POST'])
 def get_attendance_corporate():
+	global corporate_attendance
 	content = request.json
 	"""
 	input content
@@ -322,17 +330,29 @@ def get_attendance_corporate():
 	
 	"""
 
-	content_dict = json.loads(content)
+	content_dict = content
 
 	corporate_id = content_dict["corporate_id"]
 	empid_list = content_dict["ids"]
 	start_date = datetime.datetime.strptime(content_dict["query"]["start_date"], '%d-%m-%Y')
 	end_date = datetime.datetime.strptime(content_dict["query"]["end_date"], '%d-%m-%Y')
-	duration_string = content_dict["query"]["effective_time"]
-	condition = content_dict["query"]["condition"]
+	# duration_string = content_dict["query"]["effective_time"]
+	duration_string = None
+
+	try:
+		duration_string = content_dict["query"]["effective_time"]
+	except:
+		duration_string = None
+
+	condition = None
+	try:
+		condition = content_dict["query"]["condition"]
+	except:
+		condition = None
+
 
 	if duration_string == None:
-		effective_time = 0
+		effective_time = -1
 	else:
 		#converting effective_time_string to seconds
 		effective_time = int(duration_string[:2])*3600 + int(duration_string[3:5])*60 + int(duration_string[6:])
@@ -362,7 +382,6 @@ def get_attendance_corporate():
 				for emp in corporate_attendance[corporate_id][start_date]:
 					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][start_date][emp]["duration"] > effective_time:
 						present_emp_list.append(emp)
-
 				output_dict[start_date.strftime('%d-%m-%Y')] = present_emp_list
 
 			start_date += datetime.timedelta(days=1)
@@ -387,10 +406,10 @@ def get_attendance_corporate():
 			start_date += datetime.timedelta(days=1)
 
 		for emp in days_present_per_employee:
-			if (days_present_per_employee[emp]/num_working_days)*100 > parameter:
+			if int((days_present_per_employee[emp]/num_working_days)*100) > parameter:
 				output_dict["ids"].append(emp)
 
-	return json.dumps(output_dict)
+	return output_dict
 
 
 def data_dumping_service():

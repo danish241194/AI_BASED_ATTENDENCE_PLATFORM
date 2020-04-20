@@ -290,56 +290,50 @@ def stop_fetching() :
 
 
 
-corporateToCamera = {}
+corporates_registered_with_topics={}
+corporate_images_for_topic={}
+def streamImagesForCorporate(producer,topicName):
+    global corporate_images_for_topic
+    prev_image = ""
+    while True:
+        if prev_image == corporate_images_for_topic[topicName]:
+            print("NO NEW IMAGE ",topicName)
+        else:
+            print("new iamge")
+            prev_image = corporate_images_for_topic[topicName]
+            data = {"image":prev_image}
+            producer.send(topicName, value=data)
+        time.sleep(4)
 
-corporateToImage = {}
-
-corporateCamerasOnStream = {}
-
-def validateAddCameraCorporateInput(content) :
-    returnValue = 'INVALID_INPUT'
-
-    if "corporate_id" in content and "cameras" in content :
-        if "camera_id" in content["cameras"][0] and "type" in content["cameras"][0] :
-            if "camera_id" in content["cameras"][1] and "type" in content["cameras"][1] :
-                returnValue = 'success'
-
-    return returnValue
+@app.route('/corporate/upload_image_corporate/<kafkaTopic>', methods=['GET', 'POST'])
+def upload_image_corporate(kafkaTopic):
+    global corporate_images_for_topic,corporates_registered_with_topics
+    content = request.json
+    print(kafkaTopic)
+    if kafkaTopic in corporates_registered_with_topics:
+        print("UPLOADED")
+        corporate_images_for_topic[kafkaTopic] = content["image"]
+    return {"res":"ok"}
 
 @app.route('/corporate/add_camera', methods=['GET', 'POST'])
 def add_camera_corporate():
-    global corporateToCamera,corporateCamerasOnStream
+    global corporates_registered_with_topics
     content = request.json
+    corporate_id = content["corporate_id"]
+    camera_id = content["cameras"][0]["camera_id"]
+    type_ = content["cameras"][0]["type"]
 
-    errorCode = validateAddCameraCorporateInput(content)
+    kafkaTopic = corporate_id+"_"+type_
+    print("KAFKA TOPIC ",kafkaTopic)
+    if kafkaTopic not in corporates_registered_with_topics.keys():
+        corporates_registered_with_topics[kafkaTopic]=True
+        corporate_images_for_topic[kafkaTopic]=""
+        producer = KafkaProducer(bootstrap_servers=["localhost:9092"],value_serializer=lambda x:dumps(x).encode('utf-8'))
+        thread = threading.Thread(target=streamImagesForCorporate, args=(producer, kafkaTopic,))
+        thread.start()
 
-    if errorCode == 'success' :
-
-        keyIN = str(content["corporate_id"]) + "_in"
-        keyOUT = str(content["corporate_id"]) + "_out"
-        inValue = ""
-        outValue = ""
-
-        if content["cameras"][0]["type"] == "in" :
-            inValue = content["cameras"][0]["camera_id"]
-        else :
-            inValue = content["cameras"][1]["camera_id"]
-
-        if content["cameras"][0]["type"] == "out" :
-            outValue = content["cameras"][0]["camera_id"]
-        else :
-            outValue = content["cameras"][1]["camera_id"]
-
-        corporateToCamera[keyIN] = Camera(str(inValue))
-        corporateToCamera[keyOUT] = Camera(str(outValue))
-
-        createKafkaTopic(keyIN)
-        createKafkaTopic(keyOUT)
-
-        corporateCamerasOnStream[keyIN] = False
-        corporateCamerasOnStream[keyOUT] = False
-    else :
-        print("add_camera_corporate : " + errorCode)
+    print("HERE ")
+    return {"camera_UID":kafkaTopic}
 
     """
     content
@@ -349,10 +343,6 @@ def add_camera_corporate():
                     {
                     "camera_id":21323,
                     "type":"in"
-                    },
-                    {
-                    "camera_id":1332,
-                    "type":"out",
                     }
             ]
     }
@@ -368,188 +358,6 @@ def add_camera_corporate():
 
         cameras_unique_ids = [id1,id2]
     """
-    returnValue = {"Response" : "OK"}
-    if errorCode != 'success' :
-        returnValue = {"Response" : "ERROR"}
-    
-    return returnValue
-
-# def data_fetching_corporate(type,corporate_id,unique_id):
-    # while True:
-    """
-            if type == in:
-                get latest data for unique id and put it in corporate_id_in topic
-            else:
-                in corporate_id_out topic
-    """
-
-def validateStartFetchingCorporateInput(content) :
-    returnValue = 'INVALID_INPUT'
-    if "corporate_id" in content and "unique_id" in content :
-        returnValue = 'success'
-
-    return returnValue
-
-def streamCorporateImages(producer, topicName) :
-    global corporateToImage,corporateCamerasOnStream
-    corporateCamerasOnStream[topicName] = True 
-    lastImageSent = "" 
-    while True :
-        if corporateCamerasOnStream[topicName] :
-            if lastImageSent != corporateToImage[topicName] :
-                lastImageSent = corporateToImage[topicName]
-                producer.send(topicName, lastImageSent) 
-        else :
-            break
-
-        sleep(5)
-
-@app.route('/corporate/start_fetching', methods=['GET', 'POST'])
-def start_fetching_corporate():
-    content = request.json
-
-    errorCode = validateStartFetchingCorporateInput(content)
-
-    if errorCode == 'success' :
-        topicName = content["unique_id"]
-        producer = KafkaProducer(bootstrap_servers=KAFKA_IP + ":" + KAFKA_PORT)
-        thread = threading.Thread(target=streamCorporateImages, args=(producer, topicName,))
-        thread.start()
-
-    else :
-        print("start_fetching : " + errorCode)
-    """
-    input
-    {
-        "corporate_id":"ins_id"
-        "unique_id":"unique_id"
-    }
-    """
-    """
-        create a thread which puts data in kakfa topic(corporate_id_in or corporate_id_out)
-    """
-    """
-        output
-
-        {
-            "Response Ok":"OK"
-        }
-
-    """
-    returnValue = {"Response : ERROR"}
-    if errorCode == 'success' :
-        returnValue = {"Response : OK"}
-   
-    return returnValue
-
-def validateUploadCorporateImageInput(content) :
-    returnValue = 'INVALID_INPUT'
-    if "image" in content : 
-        returnValue = 'success'
-
-    return returnValue
-
-@app.route('/upload_corporate_image/<unique_id>', methods=['GET', 'POST'])
-def upload_corporate_image(unique_id):
-    global corporateToImage
-
-    content = request.json
-
-    errorCode = 'success'
-    errorCode = validateUploadCorporateImageInput(content)
-
-    if(errorCode == 'success'):
-        corporateToImage[unique_id] = content['image']
-    else :
-        print("upload_corporate_image : " + errorCode)
-
-
-    """
-    content input
-    {
-    "image":"string"
-    }
-    """
-    
-    """
-        put the latest image in your data structure
-    """
-    returnValue = {"Response : ERROR"}
-    if errorCode == 'success' :
-        returnValue = {"Response : OK"}
-   
-    return returnValue
-
-def validateGetCorporateCameraInput(content) :
-    returnValue = 'INVALID_INPUT'
-    if "corporate_id" in content and "type" in content :
-        returnValue = 'success'
-
-    return returnValue
-
-@app.route('/institute/get_corporate_camera_instance', methods=['GET', 'POST'])
-def get_corporate_camera_instance():
-    global corporateToCamera
-
-    content = request.json
-
-    errorCode = 'success'
-
-    errorCode = validateGetCorporateCameraInput(content)
-
-    if errorCode != 'success' :
-        print("get_corporate_camera_instance : " + errorCode)
-        returnValue =  errorCode
-    else :
-        key = str(content['corporate_id']) + "_" + content["type"]
-
-        if key in corporateToCamera :
-            returnValue = corporateToCamera[key].getCameraID()
-        else :
-            returnValue = "Not initialized"
-
-    return returnValue
-    """
-    input
-    {
-        "corporate_id":"ins id"
-        "type":"room id"
-    }
-    """
-    """
-        output
-
-        {
-            "topic":UNIQUE ID YOU GENERATED
-        }
-
-    """
-    # return OUTPUT
-
-def validateStopCorporateFetchingInput(content) :
-    returnValue = 'INVALID_INPUT'
-    if "corporate_id" in content and "unique_id" in content :
-        returnValue = 'success' 
-
-    return returnValue
-
-# @app.route('/institute/stop_corporate_fetching', methods=['GET', 'POST'])
-def stop_corporate_fetching() :
-    global corporateCamerasOnStream
-    """
-    input
-    {
-        "corporate_id":"ins_id"
-        "unique_id":"unique_id"
-    }
-    """
-    content = request.json
-    errorCode = validateStopCorporateFecthingInput(content)
-
-    if errorCode == 'success' :
-        corporateCamerasOnStream[topicName] = False
-    else :
-        print("stop_corporate_fetching : " + errorCode)
 
 def data_dumping_service():
     while True:
