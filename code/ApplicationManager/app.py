@@ -37,6 +37,11 @@ def support_jsonp(f):
             return f(*args, **kwargs)
     return decorated_function
 
+def convertDate(date):
+    new_Date = date.split("-")
+    date = str(new_Date[2])+"-"+str(new_Date[1])+"-"+str(new_Date[0])
+    return date
+
 @app.route("/") 
 def home():
     return render_template("login.html")
@@ -55,8 +60,12 @@ def login():
     print(credentials)
     
     if userid in users:
-        if password == credentials[userid]:
-            return render_template("institutehome.html",user = userid)
+        credentials[userid]
+        if password == credentials[userid][0]:
+            if credentials[userid][1] == "institute":
+                return render_template("institutehome.html",user = userid)
+            else:
+                return render_template("corporatehome.html",user = userid)
     flash("invalid")
     return render_template("login.html")
 
@@ -65,11 +74,13 @@ def login():
 @app.route("/registeruser",methods=['POST']) 
 def registerUser():
     print(users)
+    type = request.form['type']
     name = request.form['name']
     userid = request.form['userid']
     password = request.form['password']
     email = request.form['email']
     address = request.form['address']
+    print(type)
     if not name or not userid or not password or not email or not address:
         flash("incomplete")
         return render_template("register.html")
@@ -77,17 +88,19 @@ def registerUser():
     if userid in users:
         flash("id exists")
         return render_template("register.html")
-    else:
-        flash("User successfully registered")  
-        users.append(userid)  
-        credentials[userid]=password
-        return render_template("login.html")
+
+    flash("User successfully registered")  
+    users.append(userid)
+    temp = [password,type]
+    credentials[userid]=temp
+    return render_template("login.html")
+
 
 def retrieveListFromString(str_):
     return str_.split(",")
 
-@app.route("/viewcameras/<id>")
-def viewCamera(id):
+@app.route("/viewinstitutecameras/<id>")
+def viewInstituteCamera(id):
     pathtofile = './static/data/institutes'
     pathtofile = os.path.join(pathtofile,id)
     pathtofile = os.path.join(pathtofile,"cameras")
@@ -108,6 +121,30 @@ def viewCamera(id):
     data["cameras"] = cameralist
     print(data)
     return render_template("institutecameras.html",data = data)
+
+
+@app.route("/viewcorporatecameras/<id>")
+def viewCorporateCamera(id):
+    pathtofile = './static/data/corporates'
+    pathtofile = os.path.join(pathtofile,id)
+    pathtofile = os.path.join(pathtofile,"cameras")
+    if not path.exists(pathtofile):
+        flash("nocameras")
+        return render_template("corporatehome.html",user = id)
+    entries = os.listdir(pathtofile)
+    cameralist = []
+    for entry in entries:
+        dbfile = open(pathtofile+"/"+entry,'rb')
+        db = pickle.load(dbfile)
+        temp = {}
+        for key in db:
+            temp[key] = db[key]
+        dbfile.close()
+        cameralist.append(temp)
+    data = {}
+    data["cameras"] = cameralist
+    print(data)
+    return render_template("corporatecameras.html",data = data)
 
 @app.route("/viewcourses/<id>")
 def viewCourses(id):
@@ -134,8 +171,8 @@ def viewCourses(id):
     print(data)
     return render_template("institutecourses.html",data = data)
 
-@app.route("/addcamera/<id>",methods=['POST'])
-def addCamera(id):
+@app.route("/addinstitutecamera/<id>",methods=['POST'])
+def addInstituteCamera(id):
     room = request.form['room']
     camera_id = request.form['camera_id']
     if not room or not camera_id:
@@ -164,11 +201,66 @@ def addCamera(id):
         req = requests.post("http://localhost:5004/institute/add_camera",json=data_to_sensor_manager)
         return render_template("institutehome.html",user = id)
 
+
+#complete api part and testing
+@app.route("/addcorporatecamera/<id>",methods=['POST'])
+def addCorporateCamera(id):
+    gate = request.form['gate']
+    camera_id = request.form['camera']
+    type = request.form['type']
+    if not gate or not camera_id or not type:
+        flash("Missing fields")
+        return render_template("corporatehome.html",user = id)
+    else: 
+        picklepath = "static/data/corporates/"
+        picklepath = os.path.join(picklepath,id)  
+        if not path.exists(picklepath):
+            os.mkdir(picklepath)
+        picklepath = os.path.join(picklepath,"cameras")  
+        if not path.exists(picklepath):
+            os.mkdir(picklepath)
+
+        
+        picklepath += ("/"+camera_id+".pickle")
+        pickle_out = open(picklepath,"wb")
+        api="http://127.0.0.1:5004/upload_image/"
+        # api += id+"_"+room+"_"+camera_id
+        # data = {"camera_id":camera_id,"room":room,"api":api}    
+        # print(data)
+        # pickle.dump(data, pickle_out)
+        # pickle_out.close() 
+        # flash("Camera successfully Added")
+        # data_to_sensor_manager = {"institute_id":id,"cameras" :[{"camera_id":camera_id,"room_id":room}]}
+        # req = requests.post("http://localhost:5004/institute/add_camera",json=data_to_sensor_manager)
+        return render_template("corporatehome.html",user = id)
+
 @app.route("/<id>",methods=['POST'])
 def addStudents(id):
     if "file" not in request.files:
         flash("No file part")
         return render_template("institutehome.html",user = id)
+
+    file = request.files['file']
+    filename = file.filename
+    if file.filename == '':
+        flash('No file selected for uploading')
+    elif file and allowed_file(file.filename):
+        file.save( 'images/'+filename)
+        os.system("unzip images/"+filename +" -d images")
+        os.system("rm images/"+filename)
+        req = requests.post("http://localhost:5003/deployment/service/train_users",json={"org":"institute","id":id,"zip_location":filename.split(".")[0]})
+        flash('File successfully uploaded')
+    else:
+        flash('Allowed file types are zip')
+    return render_template("institutehome.html",user = id)
+
+
+##change api due to clash with addStudents api
+@app.route("/<id>",methods=['POST'])
+def addEmployees(id):
+    if "file" not in request.files:
+        flash("No file part")
+        return render_template("corporatehome.html",user = id)
 
     file = request.files['file']
     filename = file.filename
@@ -196,7 +288,22 @@ def removeStudents(id):
     req = requests.post("http://localhost:5003/deployment/service/remove_users",json=data_to_dep)
     flash("Removed successfully")
 
-    return render_template("institutehome.html",user = id)
+    return render_template("corporatehome.html",user = id)
+
+## backend api needs to change
+@app.route("/removeemployees/<id>",methods=['POST'])
+def removeEmployees(id):
+    employee_string = request.form['removelist']
+    if not employee_string:
+        flash("Missing fields")
+        return render_template("corporatehome.html",user = id)
+    print(employee_string)
+    students = retrieveListFromString(employee_string)
+    data_to_dep = {"institute_id":id,"roll_numbers":students}
+    req = requests.post("http://localhost:5003/deployment/service/remove_users",json=data_to_dep)
+    flash("Removed successfully")
+
+    return render_template("corporatehome.html",user = id)
 
 
 @app.route("/addcourse/<id>", methods=['POST'])
@@ -258,16 +365,16 @@ def addCourse(id):
     return render_template("institutehome.html",user = id)
 
 @app.route("/iqm/<id>")
-def renderQueryManager(id):
+def renderInstituteQueryManager(id):
     print(id)
     return render_template("institutequery.html",user = id)
 
 
-def convertDate(date):
-    new_Date = date.split("-")
-    date = str(new_Date[2])+"-"+str(new_Date[1])+"-"+str(new_Date[0])
+@app.route("/cqm/<id>")
+def renderCorporateQueryManager(id):
+    print(id)
+    return render_template("corporatequery.html",user = id)
 
-    return date
 
 @app.route("/institutequery/<id>",methods=['POST','GET'])
 def instituteQuery(id):
@@ -278,7 +385,7 @@ def instituteQuery(id):
     startdate = request.form['start']
     enddate = request.form['end']
     criterion = request.form['criterion']
-    if not startdate or not enddate or not criterion or len(coursestring)==0 or len(studentstring)==0:
+    if not startdate or not enddate or not criterion or not coursestring or not studentstring:
         flash("incomplete")
         return redirect(url_for("instituteQuery",id=id))
         # return render_template("institutequery.html",user=id )
@@ -306,6 +413,45 @@ def instituteQuery(id):
         return render_template("instiqueryresults.html",condition=1,data=out)
     else:
         return render_template("instiqueryresults.html",condition=0,data=out)
+
+
+@app.route("/corporatequery/<id>",methods=['POST','GET'])
+def corporateQuery(id):
+    if not request.form :
+        return render_template("corporatequery.html",user=id )
+    employeetring = request.form['employeelist']
+    startdate = request.form['start']
+    enddate = request.form['end']
+    effectivetime = request.form['efftime']
+    hourscriterion = request.form['hoursrequired']
+    if not startdate or not enddate or not effectivetime or not employeetring or not hourscriterion:
+        flash("incomplete")
+        return redirect(url_for("corporateQuery",id=id))
+        # return render_template("institutequery.html",user=id )
+    employees = retrieveListFromString(employeetring)
+    query = {}
+
+    query["employees"] = employees
+    query["start_date"] = convertDate(startdate)
+    query["end_date"] = convertDate(enddate)
+    if int(hourscriterion) != 0:
+        temp = {}
+        temp["greater_than"] = int(hourscriterion)
+        query["condition"] = temp
+    else:
+        query["condition"] = None
+
+    request_data = {}
+    request_data["institute_id"]=id
+    request_data["query"] = query
+    print(request_data)
+    req = requests.post("http://localhost:9874/institute/get_attendance",json=request_data)
+    out = req.json()
+    if(int(criterion)!=0):
+        return render_template("corporateresults.html",condition=1,data=out)
+    else:
+        return render_template("corporateresults.html",condition=0,data=out)
+
 
 
 if __name__ == "__main__":        # on running python app.py
