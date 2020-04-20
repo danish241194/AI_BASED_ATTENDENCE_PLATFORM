@@ -12,10 +12,10 @@ def upload_image(img):
 		print(req.json())
 	return
 
-list_=['s1.jpg','j1.png']
+list_=['s1.jpg','j1.png','a1.jpg']
 i=0
 while True:
-	upload_image(list_[i%2])
+	upload_image(list_[i%3])
 	i+=1
 	print("Uploading ",i)
 	time.sleep(2)

@@ -153,7 +153,7 @@ def addCamera(id):
         
         picklepath += ("/"+camera_id+".pickle")
         pickle_out = open(picklepath,"wb")
-        api="http://127.0.0.1:5004/"
+        api="http://127.0.0.1:5004/upload_image/"
         api+= id+"_"+room+"_"+camera_id
         data = {"camera_id":camera_id,"room":room,"api":api}
         print(data)

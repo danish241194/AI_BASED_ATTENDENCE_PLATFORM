@@ -104,7 +104,7 @@ for message in consumer:
 	# print("message ",message,"value ",message.value)
 	consumer.commit()
 	print("+GOT NEW FRAME")
-	secs = secs+20
+	secs = secs+10
 	image_string =  json.loads(message.value)["image"]
 	image_string = str.encode(image_string)
 	f = io.BytesIO(base64.b64decode(image_string))
