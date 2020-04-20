@@ -17,10 +17,11 @@
 
                 <div class="container" style="height:40%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
                     <p style="text-align: center;"><b> Add students</b></p>
-                    <form action="/addstudents/{{user}}" method="POST">
+                     <form method="post" action="/{{user}}" enctype="multipart/form-data">
                         <div class="form-group" style="margin-top: 15%;">
                             <p for="exampleFormControlFile1">Upload zip file</p>
-                            <input type="file" class="form-control-file" id="exampleFormControlFile1" name="file" >
+                            <input type="file" name ="file" class="form-control-file" id="customFile" aria-describedby="imagehelp" placeholder="Enter image">
+                            
                         </div>
                         <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff; margin-top: 5%;" >Add</button>
                     </form>    

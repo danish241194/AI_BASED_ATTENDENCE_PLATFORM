@@ -155,7 +155,7 @@ def addCamera(id):
         pickle_out = open(picklepath,"wb")
         api="http://127.0.0.1:5004/"
         api+= id+"_"+room+"_"+camera_id
-        data = {"api":api,"room":room,"camera_id":camera_id}
+        data = {"camera_id":camera_id,"room":room,"api":api}
         print(data)
         pickle.dump(data, pickle_out)
         pickle_out.close() 
@@ -264,9 +264,9 @@ def renderQueryManager(id):
 
 
 def convertDate(date):
-    for i in range(len(date)):
-        if date[i]=='/':
-            date[i]='-'
+    new_Date = date.split("-")
+    date = str(new_Date[2])+"-"+str(new_Date[1])+"-"+str(new_Date[0])
+
     return date
 
 @app.route("/institutequery/<id>",methods=['POST','GET'])
@@ -289,9 +289,9 @@ def instituteQuery(id):
     query["students"] = students
     query["start_date"] = convertDate(startdate)
     query["end_date"] = convertDate(enddate)
-    if criterion != 0:
+    if int(criterion) != 0:
         temp = {}
-        temp["greater_than"] = criterion
+        temp["greater_than"] = int(criterion)
         query["condition"] = temp
     else:
         query["condition"] = None
@@ -300,7 +300,12 @@ def instituteQuery(id):
     request_data["institute_id"]=id
     request_data["query"] = query
     print(request_data)
-    return render_template("institutequery.html",user=id )
+    req = requests.post("http://localhost:9874/institute/get_attendance",json=request_data)
+    out = req.json()
+    if(int(criterion)!=0):
+        return render_template("instiqueryresults.html",condition=1,data=out)
+    else:
+        return render_template("instiqueryresults.html",condition=0,data=out)
 
 
 if __name__ == "__main__":        # on running python app.py

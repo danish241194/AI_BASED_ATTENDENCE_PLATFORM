@@ -206,14 +206,12 @@ def get_attendance():
 
 				for student, classes_attended in classes_attended_per_student.items():
 					if cond_str == "greater_than":
-						if (classes_attended/num_classes)*100 > cond_num:
+						if int((classes_attended/num_classes)*100) > cond_num:
 							output_dict[course].append(student)
-					else:
-						if (classes_attended/num_classes)*100 < cond_num:
-							output_dict[course].append(student)
+					
 
 
-	return json.dumps(output_dict)
+	return output_dict
 
 
 '''
