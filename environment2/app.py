@@ -223,15 +223,22 @@ def addCorporateCamera(id):
         
         picklepath += ("/"+camera_id+".pickle")
         pickle_out = open(picklepath,"wb")
-        api="http://127.0.0.1:5004/upload_image/"
-        # api += id+"_"+room+"_"+camera_id
-        # data = {"camera_id":camera_id,"room":room,"api":api}    
-        # print(data)
-        # pickle.dump(data, pickle_out)
-        # pickle_out.close() 
-        # flash("Camera successfully Added")
+        api=""
+        if(type=="IN"):
+            api="http://127.0.0.1:5004/upload_image_corporate/"+id+"_"+"IN"
+        else:
+            api="http://127.0.0.1:5004/upload_image_corporate/"+id+"_"+"OUT"
+
+        data = {"camera_id":camera_id,"gate":gate,"type":type,"api":api}
+        
+        print(data)
+        
+        pickle.dump(data, pickle_out)
+        pickle_out.close() 
+        flash("Camera successfully Added")
+        data_to_SM = {"corporate_id":id,"cameras":[{"camera_id":camera_id,"type":type}]}
         # data_to_sensor_manager = {"institute_id":id,"cameras" :[{"camera_id":camera_id,"room_id":room}]}
-        # req = requests.post("http://localhost:5004/institute/add_camera",json=data_to_sensor_manager)
+        req = requests.post("http://localhost:5004/corporate/add_camera",json=data_to_SM)
         return render_template("corporatehome.html",user = id)
 
 @app.route("/<id>",methods=['POST'])
@@ -302,6 +309,7 @@ def removeEmployees(id):
     print(employee_string)
     students = retrieveListFromString(employee_string)
     data_to_dep = {"institute_id":id,"roll_numbers":students}
+    #we have written institute_id not corporate_id as same function works for both,so inorder to remove redundany we did this
     req = requests.post("http://localhost:5003/deployment/service/remove_users",json=data_to_dep)
     flash("Removed successfully")
 
@@ -346,15 +354,7 @@ def addCourse(id):
     pickle_out.close()
     flash("Course registered")
     scheduling_data = {}
-    '''
-            "institute_id":"ins id"
-            "room_id":"room id"
-            "course_no":"cs1234"
-            "day":"monday"
-            "start_time":"13:00"
-            "attendence_minutes":10
-            ""
-        '''
+  
     scheduling_data["institute_id"] = id
     scheduling_data["room_id"] = room
     scheduling_data["course_no"] = course

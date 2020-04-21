@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+    <meta charset="utf-8">
+    <title>Query manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css?v=1.0">
+</head>
+
+<body style="height: 100%; width: 100%;background-color:#f2f2f2 ;">
+    <script src="../static/js/login.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <div class="container" style="height: 100%; width: 100%;">
+        <div class="row" style="height: 100%; width: 100%;">
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+
+                <div class="container" style="width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
+                    <form action="/institutequery/{{user}}" method="POST">
+                        <p style="text-align: center;"><b>QUERY MANAGER</b></p>
+                        <div class="form-group" style="margin-top: 15%;">
+                            <label for="courselistid">Courses</label>
+                            <input type="text" class="form-control" id="courselistid" placeholder="Courses" name="courselist" value="ALL">
+                            <small id="courseHelp" class="form-text text-muted">Enter comma seperated list of courses (by default 'ALL')</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentlistid">Students</label>
+                            <input type="text" class="form-control" id="studentlistid" placeholder="Students" name="studentlist" value="ALL">
+                            <small id="studentHelp" class="form-text text-muted">Enter comma seperated list of students (by default 'ALL')</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="startdateid">Starting date</label>
+                            <input type="date" class="form-control" id="startdateid" placeholder="Starting date" name="start">
+                            <small id="startdateHelp" class="form-text text-muted">Starting date for attendance calculation</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="enddateid">Ending date</label>
+                            <input type="date" class="form-control" id="enddateid" placeholder="Ending date" name="end">
+                            <small id="enddateHelp" class="form-text text-muted">Ending date for attendance calculation</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="percentage">Percentage criterion</label>
+                            <input type="number" class="form-control" id="percentageid" placeholder="Attendance percentage" name="criterion" value="0">
+                            <small id="percentageHelp" class="form-text text-muted">Attendance criterion in percentage <b style="color: black;">(if any)</b></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;">Query</button>
+                    </form>
+                </div>
+                {% with messages = get_flashed_messages() %}
+                        {% for message in messages %}
+                            {% if message %}
+                                {% if message == "incomplete" %}
+                                    <script>alert("Missing fields")</script>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

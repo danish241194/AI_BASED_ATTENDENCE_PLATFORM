@@ -1,0 +1,50 @@
+<!doctype html>
+
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<style>
+tr {text-align: center;}
+table {margin: 10px;background-color:#FFFFFF;}
+</style>
+
+<body style="height: 100%; width: 100%;background-color:#f2f2f2 ;">
+    <script src="../static/js/institutecourses.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <div class="container" style="height: 100%; width: 100%;">
+        <div class="row" style="height: 100%; width: 100%;">
+            <div class="col-sm-12" style="height: 100%;">
+                <table class="table table-striped" id="coursetable_id">
+                    <thead>
+                      <tr>
+                        <th style="width: 33%; text-align: center;">Camera Id</th>
+                        <th style="width: 33%; text-align: center">Room</th>
+                        <th style="width: 33%; text-align: center">API</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in data.items() %}
+                            <!-- {{ key }} : {{ value }} -->
+                            {% for each in value %}
+                                <!-- {{each}}    -->
+                                <tr>{% for k, v in each.items() %}
+                                    <td>{{v}}</td>
+                                {% endfor %}</tr>        
+                            {% endfor %}
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-sm-0" style="height: 100%;">   
+            </div>
+            <div class="col-sm-0" style="height: 100%;">   
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

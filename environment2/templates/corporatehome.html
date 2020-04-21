@@ -54,7 +54,7 @@
 
                 <div class="container" style="height:45%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
                     <p style="text-align: center;"><b> Add camera</b></p>
-                    <form action="/addcamera/{{user}}" method="POST">
+                    <form action="/addcorporatecamera/{{user}}" method="POST">
                         <div class="form-group" style="width: 75%; margin-left: 15%;margin-top: 15%;">
                             <input type="text" class="form-control" placeholder="Gate " id="camera_gate_id" name="gate">
                         </div>
@@ -64,8 +64,8 @@
                         <div class="form-group" style="width: 75%; margin-left: 15%;">
                             <select class="form-control" id="type_id" name = "type">
                                 <option selected disabled ><p style="color: grey;">Camera type</p></option>
-                                <option value="inward" selected>Inward</option>
-                                <option value="outward">Outward</option>
+                                <option value="IN" selected>IN</option>
+                                <option value="OUT">OUT</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" >Add</button>
