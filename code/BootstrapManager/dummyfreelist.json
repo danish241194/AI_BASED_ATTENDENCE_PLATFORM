@@ -4,14 +4,26 @@
 					"machine_1":{
 								"ip":"127.0.0.1",
 								"port":"9872",
-								"username":"xyz",
-								"password":"4546"
+								"username":"test1",
+								"password":"1234"
 							},
 					"machine_2":{
 								"ip":"127.0.0.1",
 								"port":"9875",
-								"username":"xyz",
-								"password":"4546"
+								"username":"test2",
+								"password":"1234"
+						},
+					"machine_3":{
+								"ip":"127.0.0.1",
+								"port":"7892",
+								"username":"test3",
+								"password":"1234"
+							},
+					"machine_4":{
+								"ip":"127.0.0.1",
+								"port":"7899",
+								"username":"test4",
+								"password":"1234"
 						}
 				}
 
