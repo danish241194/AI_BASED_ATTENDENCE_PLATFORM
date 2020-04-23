@@ -4,25 +4,30 @@ import urllib, json
 import subprocess
 import threading
 import paramiko
-
-
-def copy(ssh_client,ftp_client,source, target):
-		# print(source,target)
+import time
+from texttable import Texttable
+	
+health_status = {}
+def mycopy(ftp_client,source,target):
+		
 		for item in os.listdir(source):
 				if os.path.isfile(os.path.join(source, item)):
-						# print("Enter")
-						# print("File=>",item)
-						
-						ftp_client.put(os.path.join(source, item),str(target)+"/"+str(item))
-						# print("Exit")
+						ftp_client.put(os.path.join(source, item),target+"/"+str(item))
 				else:
-						# print("folder=>",item)
-						stdin,stdout,stderr=ssh_client.exec_command("mkdir "+str(target)+"/"+str(item))
-						copy(ssh_client,ftp_client,os.path.join(source, item), str(target)+"/"+str(item))
+						mycopy(ftp_client,os.path.join(source, item),target+"/"+str(item))
 
 
-def runRegistry():
-	subprocess.call("python3 Folder/Folder.py '-p 5982'", shell=True)
+def create_structure(ssh_client,source,target):
+	
+		for item in os.listdir(source):
+				if os.path.isfile(os.path.join(source, item))==False:
+						stdin,stdout,stderr=ssh_client.exec_command("mkdir "+target+"/"+str(item))
+						create_structure(ssh_client,os.path.join(source, item),target+"/"+str(item))
+
+def copyit(ssh_client,ftp_client,source,destination):
+	create_structure(ssh_client,source,destination)
+	mycopy(ftp_client,source,destination)
+
 
 def getdummyData():
 	with open("freelist.json") as f:
@@ -37,138 +42,181 @@ def Update(freelist,machine1,machine2):
 		with open('newfreelist.json', 'w') as data_file:
 							data = json.dump(freelist, data_file)
 
-		return data   	
+		return data   
+
+def thread_run(ssh_client1, filename):
+	stdin,stdout,stderr=ssh_client1.exec_command("python3.6 "+filename)
+	print(filename,stderr.readlines())
+
+def setup_machine_1(machine):
+
+	ssh_client1 =paramiko.SSHClient()
+	ssh_client1.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	ssh_client1.connect(hostname=machine["ip"],username=machine["username"],password=machine["password"])
+	stdin,stdout,stderr=ssh_client1.exec_command("mkdir images")
+	stdin,stdout,stderr=ssh_client1.exec_command("mkdir encodings")
+
+
+	ftp_client1=ssh_client1.open_sftp()
+	copyit(ssh_client1,ftp_client1,"../ApplicationManager",".")
+	copyit(ssh_client1,ftp_client1,"../DeploymentManager",".")
+
+	thread = threading.Thread(target=thread_run, args=(ssh_client1, "app.py",))
+	thread.start()
+	print("APP RUNNING")
+
+	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_deployment_manager.py",))
+	thread.start()
+
+	print("DEP RUNNING")
+
+	ftp_client1.close()
+	# ssh_client1.close()
+
+
+def setup_machine_2(machine):
+
+	ssh_client1 =paramiko.SSHClient()
+	ssh_client1.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	ssh_client1.connect(hostname=machine["ip"],username=machine["username"],password=machine["password"])
+
+
+
+	ftp_client1=ssh_client1.open_sftp()
+	copyit(ssh_client1,ftp_client1,"../ServerLifeCycle",".")
+	copyit(ssh_client1,ftp_client1,"../ServiceLifeCycleManager",".")
+	copyit(ssh_client1,ftp_client1,"../QueryManager",".")
+	copyit(ssh_client1,ftp_client1,"../Schedular",".")
+	copyit(ssh_client1,ftp_client1,"../SensorManager",".")
+
+	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_server_lcm.py",))
+	thread.start()
+
+	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_servicelife_cycle.py",))
+	thread.start()
+	# ssh_client1.close()
+
+
 def startBootstrap():
 
 	freelist=getdummyData()
 	machine_list=list(freelist["machines"].keys())
 	machine1=freelist["machines"][machine_list[0]]
 	machine2=freelist["machines"][machine_list[1]]
-	ssh_client1 =paramiko.SSHClient()
-	ssh_client1.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-	ssh_client2 =paramiko.SSHClient()
-	ssh_client2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-	ssh_client1.connect(hostname=machine1["ip"],username=machine1["username"],password=machine1["password"])
-	ssh_client2.connect(hostname=machine2["ip"],username=machine2["username"],password=machine2["password"])
 
-	stdin,stdout,stderr=ssh_client1.exec_command("mkdir Project")
-	stdin,stdout,stderr=ssh_client1.exec_command("mkdir Course")
-	stdin,stdout,stderr=ssh_client1.exec_command("mkdir Images")
-	stdin,stdout,stderr=ssh_client1.exec_command("mkdir Encodings")
-	stdin,stdout,stderr=ssh_client2.exec_command("mkdir Project")
+	setup_machine_1(machine1)
 
-
-	ftp_client1=ssh_client1.open_sftp()
-	copy(ssh_client1,ftp_client1,'../ApplicationManager','Project')
-	copy(ssh_client1,ftp_client1,'../DeploymentManager','Project')
-	copy(ssh_client1,ftp_client1,'../Registry','Project')
-	
-
-
-	ftp_client2=ssh_client2.open_sftp()
-	# copy(ssh_client2,ftp_client,'../ServiceLifeCycleManager','Project')
-	copy(ssh_client2,ftp_client2,'../ServerLifeCycle','Project')
-	# # stdin,stdout,stderr=ssh_client1.exec_command("cp  deploymentmanager.py")
-	# print("enter")
-
-	## ==> RUNNING MACHINE ONE
-	print("Running Registry in Machine=",machine1["username"])
-	stdin,stdout,stderr=ssh_client1.exec_command("python3 Project/registry.py -p 5982")
-
-	print("Running Deployment Manager in Machine=",machine1["username"])
-	stdin,stdout,stderr=ssh_client1.exec_command("python3 Project/run_deployment_manager.py")
-	# print(stderr.readlines())
-
-	print("Running Application Manager in Machine=",machine1["username"])
-	stdin,stdout,stderr=ssh_client1.exec_command("python3 Project/app.py")
-	# print(stderr.readlines())
-
-	## ==> RUNNING MACHINE TWO
-	print("Running Server Life Cycle Manager in Machine=",machine2["username"])
-	stdin,stdout,stderr=ssh_client2.exec_command("python3 Project/run_server_lcm.py")
-
-	print("Free list sent to ServiceLifeCycleManager")
 	freelist=Update(freelist,machine_list[0],machine_list[1])
-	ftp_client2.put("newfreelist.json","Project/freelist.json")
-	# print(stderr.readlines())
-	ftp_client1.close()
-	ftp_client2.close()
+	setup_machine_2(machine2)
+	return freelist
+
+def draw_details():
+	os.system("clear")
+
+	print("\n\t\t Health Status")
+
+	TABLE_ = [['SERVICE Name', 'IP','PORT','STATUS']]
+	for key in health_status.keys():
+		TABLE_.append(health_status[key])
+	t = Texttable()
+	t.add_rows(TABLE_)
+	print(t.draw())
+	try:
+		res = requests.get('http://172.17.0.2:3001/give_load_details_ai_machines')
+		content = res.json()
+
+		load = content["load"]
+		machines = content["machines"]
+
+		details=[['Machine Name', 'IP','SSH-PORT','STATUS','LOAD']]
+		for i in range(len(load)):
+			list_=["AI NODE "+str(i)]
+			list_.append(machines[i]["ip"])
+			list_.append(machines[i]["port"])
+			if(load[i]==0):
+				list_.append("IDLE")	
+			else:
+				list_.append("RUNNING")	
+
+			list_.append(str(load[i])+"/3")
+			details.append(list_)	
 
 
-	# stdin,stdout,stderr=ssh_client1.exec_command("ls")
-	# print(stdout.readlines())
-	# # print("hhshs")
-	# # res = requests.get('http://127.0.0.1:5982/get_free_list')
-	# # print(res.json())
-	# # stdin,stdout,stderr=ssh_client1.exec_command("python3 deploymentmanager.py")
-	# stdin,stdout,stderr=ssh_client1.exec_command("python3 -m pip install --user flask")
-	# stdin,stdout,stderr=ssh_client1.exec_command("python3 -m pip install --user flask_cors")
-	# stdin,stdout,stderr=ssh_client1.exec_command("python3 app.py")
-	# print(stderr.readlines())
-	# subprocess.call(['Folder/Folder.py', '-p', '5982']) 
-	# exec()
-	# python3 "Folder/Folder.py"
+		print("\n\t\t AI NODES")
+		t = Texttable()
+		t.add_rows(details)
+		print(t.draw())
+	except:
+		details=[['Machine Name', 'IP','SSH-PORT','STATUS','LOAD']]
+
+		print("\n\t\t AI NODES")
+		t = Texttable()
+		t.add_rows(details)
+		print(t.draw())
+
+def health_individual(name,ip,port):
+	global health_status
+
+	try:
+		res = requests.get('http://'+ip+":"+str(port)+'/health')
+
+		health_status[name]=[name,ip,port,"RUNNING"]
+	except:
+		health_status[name]=[name,ip,port,"DOWN"]
 
 
-'''
-	1.Create a foler Project 
+def health_manager():
+	global health_status
+	service_ip_mapping={}
+	service_port_mapping={}
 
-	course
-	images
-	encodings
-
-	2.Copy the code of registry into Project FOLDER and run this registry code py passing port number 5982
-	which is fix in our platform
-	2.read the free list file which will be in the following format
-		machines:[
-				machine_1:{
-							"ip":ip,
-							"port":port
-							"username":username,
-							"password":password
-						},
-				machine_2:{
-							"ip":ip,
-							"port":port,
-							"username":username,
-							"password":password
-					},
-					.
-					.
-					.
-					.
-
-				]
-	3. Read the top two  machines and using "paramiko" library copy codes of server life cycle and service life cycle
-	   manager in those two machines and also copy machineagent.py code from current directory to these to machines
-	   For service life cycle one copy also codes of query manager,sensor manager, scheduler
-
-	4. using "paramiko" run serverlifecyle.py and machineagent.py in one machine
-		and run servicelifecycle.py and machineagent.py in another machine
-		and add the entry of these two services in registry
-
-				as  data = {
-					"servicename":scheduler
-					"ip":ip,
-					"port":port,
-					"username":username,
-					"password",password,
-		    			}
-		    res = requests.post('http://registryip:registryport/service_entry', json=data)
-
-	5.for rest of services(scheduler,sensormanager,healthcheckmanager) call service life cycle manager api
-		    res = requests.get('http://service_lcm_ip:port/run_service/<service>')
-
-		    do remember call health check manager in the end
-
-	
-
-'''
-if __name__ == "__main__": 
-	startBootstrap()
+	service_ip_mapping['Application Manager'] = '172.17.0.1'
+	service_ip_mapping['Server LCM'] = '172.17.0.2'
+	service_ip_mapping['Service LCM'] = '172.17.0.2'
+	service_ip_mapping['Deployment Manager'] = '172.17.0.1'
+	service_ip_mapping['Query Manager'] = '172.17.0.3'
+	service_ip_mapping['Sensor Manager'] = '172.17.0.4'
+	service_ip_mapping['Scheduler'] = '172.17.0.3'
 
 
 
-	# mac1- reg.py dep.py app.py
+	service_port_mapping['Application Manager'] = 5000
+	service_port_mapping['Server LCM'] = 3001
+	service_port_mapping['Service LCM'] = 5993
+	service_port_mapping['Deployment Manager'] = 5003
+	service_port_mapping['Query Manager'] = 9874
+	service_port_mapping['Sensor Manager'] = 5004
+	service_port_mapping['Scheduler'] = 8899
 
-	# mac2-
+
+	services = ['Scheduler','Application Manager','Query Manager','Server LCM','Deployment Manager','Sensor Manager','Service LCM']
+	while True:	
+		time.sleep(5)
+		for service in services:
+			health_individual(service,service_ip_mapping[service],service_port_mapping[service])
+		draw_details()
+
+
+
+if _name_ == "_main_": 
+
+	free_list = startBootstrap()
+
+	other_servies = ["scheduler","query_manager","sensor_manager"]
+
+	try:
+		with open("newfreelist.json") as f:
+			content= json.load(f)
+		
+			requests.post("http://172.17.0.2:3001/add_new_machines",json=content)
+	except:
+		print("ERROR WATING FOR 5 Seconds")
+		time.sleep(5)
+		with open("newfreelist.json") as f:
+			content= json.load(f)
+		requests.post("http://172.17.0.2:3001/add_new_machines",json=content)
+	time.sleep(2)
+	for service in other_servies:
+		requests.get("http://172.17.0.2:5993/run_service/"+service)
+
+	health_manager()
