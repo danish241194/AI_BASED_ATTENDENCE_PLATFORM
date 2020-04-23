@@ -1,0 +1,43 @@
+{
+	"machines":
+				{
+					"machine_1":{
+								"ip":"172.17.0.1",
+								"port":"22",
+								"username":"machine1",
+								"password":"password",
+								"type":"AI"
+							},
+					"machine_2":{
+								"ip":"172.17.0.2",
+								"port":"22",
+								"username":"root",
+								"password":"pppppp",
+								"type":"NORMAL"
+						},
+					"machine_3":{
+								"ip":"172.17.0.3",
+								"port":"22",
+								"username":"root",
+								"password":"pppppp",
+								"type":"NORMAL"
+							},
+					"machine_4":{
+								"ip":"172.17.0.4",
+								"port":"22",
+								"username":"root",
+								"password":"pppppp",
+								"type":"NORMAL"
+						},
+
+					"machine_5":{
+								"ip":"localhost",
+								"port":"22",
+								"username":"machine2",
+								"password":"passwordmachine2",
+								"type":"AI"
+						}
+
+				}
+
+}

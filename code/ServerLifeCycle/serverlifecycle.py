@@ -8,16 +8,93 @@ import pickle
 app = Flask(__name__)
 REGISTRY_IP = None
 REGISTRY_PORT = None
-users_containers_load = [0]
-new_machine = {}
+users_containers_load = []
 
-new_machine["container_id"]=0
-new_machine["ip"]="172.17.0.1"
-new_machine["port"]="22"
-new_machine["username"]="machine1"
-new_machine["password"]="password"
+service_nodes = []
+servie_noes_load=[]
 
-users_containers_details = [new_machine]
+
+@app.route('/health')
+def health():
+    return {"res":"live"}
+
+users_containers_details = []
+
+
+@app.route('/give_load_details_ai_machines')
+def give_load_details():
+
+	return {"machines":users_containers_details,"load":users_containers_load}
+
+@app.route('/show_machines')
+def show_machines():
+	print("AI MACHINES")
+	print(users_containers_details)
+	print("SERVICE MACHINES")
+	print(service_nodes)
+	return {"ai_machines":users_containers_details,"service_machines":service_nodes}
+
+
+@app.route('/allocate_service_machine')
+def allocate_service_machine():
+	global service_nodes,load
+	content = request.json
+	if(len(service_nodes)==0):
+		return {"res":"no new machine"}
+	for i in range(len(service_nodes)):
+		if servie_noes_load[i]<1:
+			servie_noes_load[i]+=1
+			return service_nodes[i]
+	return {"res":"no machine"}
+
+
+@app.route('/add_new_machines', methods=['GET', 'POST'])
+def add_new_ai_machines():
+	global users_containers_load,users_containers_details,service_nodes
+
+	'''
+	{
+		machine_1:{
+			"ip"
+			"port"
+			"username"
+			"password"
+		},
+		machine_2:{
+				.
+				.
+				.
+				.
+		}
+	}
+	'''
+	content_machines = request.json
+	content_machines = content_machines["machines"]
+	for key in content_machines.keys():
+
+		content = content_machines[key]
+		if content["type"]=="AI":
+			new_machine = {}
+			new_machine["container_id"]=len(users_containers_details)
+			new_machine["ip"]=content["ip"]
+			new_machine["port"]=content["port"]
+			new_machine["username"]=content["username"]
+			new_machine["password"]=content["password"]
+			users_containers_load.append(0)
+			users_containers_details.append(new_machine)
+		else:
+			new_machine = {}
+			new_machine["ip"]=content["ip"]
+			new_machine["port"]=content["port"]
+			new_machine["username"]=content["username"]
+			new_machine["password"]=content["password"]
+			service_nodes.append(new_machine)
+			servie_noes_load.append(0)
+			
+	return {"res":"ok"}
+
+
+
 @app.route('/serverlcm/de_allocate_user_machine/<container_id>')
 def de_allocate_user_machine(container_id):
 	print("REQUEST TO DEALLOCATE")
@@ -42,29 +119,7 @@ def allocate_user_machine():
 			print("\t\t* ",users_containers_details[i])
 
 			return users_containers_details[i];
-	print("\t- REQUEST FOR FREE LIST ")
-	res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_free_list")
-	print("\t- FREE LIST ",res.json())
-
-	content = res.json()
-	if(content["res"]=="OK"):
-		new_machine = {}
-		new_machine["container_id"]=len(users_containers_details)
-		new_machine["ip"]=content["ip"]
-		new_machine["port"]=content["port"]
-		new_machine["username"]=content["username"]
-		new_machine["password"]=content["password"]
-		users_containers_load.append(1)
-		users_containers_details.append(new_machine)
-		print("\t- REQUESTING REGISTRY TO REMOVE ON ENTRY ")
-
-		res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/remove_from_free_list")
-		return new_machine
-
-	print("\t- NO MACHINE AVAILABLE ",res.json())
-
-	return {"container_id",-1}
-
+	return {"res":"no_machine"}
 
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
@@ -76,4 +131,5 @@ if __name__ == "__main__":
 	
 	REGISTRY_IP = args["registry_ip"]
 	REGISTRY_PORT = args["registry_port"]
-	app.run(debug=True,port=int(args["port"])) 
+	
+	app.run(debug=True,host = "0.0.0.0",port=int(args["port"])) 

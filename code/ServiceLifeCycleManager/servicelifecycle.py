@@ -9,74 +9,40 @@ import paramiko
 import os
 app = Flask(__name__)
 
+service_files = {}
+service_files["scheduler"]=["run_scheduler.py","scheduler.py"]
+service_files["query_manager"]=["run_query_manager.py","querymanager.py"]
+service_files["sensor_manager"]=["run_sensor_manager.py","sensormanager.py"]
+
 REGISTRY_IP = None
 REGISTRY_PORT = None
-@app.route('/run_service/<service>', methods=['GET', 'POST'])
+
+def thread_run(ssh_client1, filename):
+	stdin,stdout,stderr=ssh_client1.exec_command("python3.6 "+filename)
+	print(filename,stderr.readlines())
+@app.route('/health')
+def health():
+    return {"res":"live"}
+@app.route('/run_service/<service>')
 def run_service(service):
-	# res = requests.get('http://'+REGISTRY_IP+':'+REGISTRY_PORT+'/get_service_location/'+service)
-	# content = res.json()
-	# ip = content["ip"]
-	# port = content["port"]
+	res = requests.get('http://172.17.0.2:3001/allocate_service_machine')
+	machine = res.json()
+	print("machine ",machine)
+	ssh_client1 =paramiko.SSHClient()
+	ssh_client1.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	ssh_client1.connect(hostname=machine["ip"],username=machine["username"],password=machine["password"])
 
-	# res = requests.get('http://'+ip+':'+int(port)+'/assign_machine_for_platform_sevice')
-	# content = res.json()
+	ftp_client1=ssh_client1.open_sftp()
 
-	ssh_client =paramiko.SSHClient()
-	ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-	ssh_client.connect(REGISTRY_IP,22,username='tayal',password='2357',timeout = 4)
-	ftp_client=ssh_client.open_sftp()
-	localFile = service+'.py'
+	ftp_client1.put(service_files[service][0],service_files[service][0])
+	ftp_client1.put(service_files[service][1],service_files[service][1])
 
-	remotePath = '~/Downloads'
-	# ssh_client.exec_command("mkdir -p " +remotePath)
+	thread = threading.Thread(target=thread_run, args=(ssh_client1,service_files[service][0] ,))
+	thread.start()
 
-	print("yo")
-	stdin,stdout,stderr=ssh_client.exec_command("ls")
-	print(stdout.readlines())
-	
-
-	if os.path.isfile(localFile):
-		ftp_client.put(localFile, remotePath)
-	else:
-		raise IOError('Could not find localFile %s !!' % localFile)
-
-	ftp_client.close()
-
-	'''
-		    
-			
-				content = {
-					"ip":ip,
-					"port":port,
-					"username":username,
-					"password",password,
-		    			}
-
-			
-		   using "paramiko" copy the service(given) code which will be in the current direct to the remote
-		   machine whose details are in content and also copy machine agent code and run both service file as
-		   well as machineagent file
-
-		   add the entry of these two services in registry
-
-				as  data = {get_free_list():
-					"servicename":scheduler
-					"ip":ip,
-					"port":port,
-					"username":username,
-					"password",password,
-		    			}
-		    res = requests.post('http://registryip:registryport/service_entry', json=data)
-		
-	'''
-	return {"Response":data}
-
-
-def data_dumping_service():
-	while True:
-		time.sleep(60) #wait for 1 minute then upload data in registry
-		data = {"institue":institue_data,"corporate":"corporate_data"}
-		res = requests.post('http://'+REGISTRY_IP+':'+str(REGISTRY_PORT)+'/store/query_manager', json=data)
+	# stdin,stdout,stderr=ssh_client1.exec_command("python3 Environment/run_service_lcm.py")
+	ftp_client1.close()
+	return machine
 
 
 if __name__ == "__main__": 
@@ -89,28 +55,4 @@ if __name__ == "__main__":
 	
 	REGISTRY_IP = args["registry_ip"]
 	REGISTRY_PORT = args["registry_port"]
-	"""
-	res = requests.get('http://'+REGISTRY_IP+':'+str(REGISTRY_PORT)+'/fetch/query_manager')
-	data = res.json()
-	//inititalize you data
-	t1 = threading.Thread(target=data_dumping_service) 
-	t1.start()
-	"""
-	# app.run(debug=True,port=int(args["port"])) 
-
-	data = {
-			"servicename":"scheduler",
-
-			"ip":"127.9.9.9",
-			"port":"9000",
-			"username":"username",
-			"password":"password"
-			}
-	print("ok1")
-	# res = requests.post("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/service_entry", json=data)
-	# print(res.json())
-	print("ok2")
-	# res = requests.get("http://"+REGISTRY_IP+":"+REGISTRY_PORT+"/get_service_location/"+"scheduler")
-	# print(res.json())
-
-	run_service('querymanager')
+	app.run(debug=True,host = "0.0.0.0",port=int(args["port"])) 

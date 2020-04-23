@@ -15,7 +15,7 @@ app = Flask(__name__)
 REGISTRY_IP = None
 REGISTRY_PORT = None
 
-deployment_manager_ip="172.17.0.1"
+deployment_manager_ip="localhost"
 deployment_manager_port = 5003
 class Scheduler:
     def __init__(self):   

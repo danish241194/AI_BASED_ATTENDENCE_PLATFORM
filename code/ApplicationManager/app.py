@@ -50,7 +50,9 @@ def home():
 @app.route("/register") 
 def registerCalled():
     return render_template("register.html")
-
+@app.route('/health')
+def health():
+    return {"res":"live"}
 @app.route("/login",methods=['POST'])
 def login():
     print("attempted")
@@ -82,7 +84,7 @@ def startClicked(id):
     print(corporatestart)
     response = {"org":"corporate","corporate_id":id}
     print("SENDING REQUEST TO DEP. MANAGER TO START ATTENDENCE")
-    res = requests.post('http://localhost:5003/deployment/service/start_attendence', json=response)
+    res = requests.post('http://172.17.0.1:5003/deployment/service/start_attendence', json=response)
     if id in corporatestart:
         return render_template("corporatehome.html",user = id, start = 1)
     else:
@@ -212,7 +214,7 @@ def addInstituteCamera(id):
         
         picklepath += ("/"+camera_id+".pickle")
         pickle_out = open(picklepath,"wb")
-        api="http://127.0.0.1:5004/upload_image/"
+        api="http://172.17.0.1:5004/upload_image/"
         api+= id+"_"+room+"_"+camera_id
         data = {"camera_id":camera_id,"room":room,"api":api}
         print(data)
@@ -220,7 +222,7 @@ def addInstituteCamera(id):
         pickle_out.close() 
         flash("Camera successfully Added")
         data_to_sensor_manager = {"institute_id":id,"cameras" :[{"camera_id":camera_id,"room_id":room}]}
-        req = requests.post("http://localhost:5004/institute/add_camera",json=data_to_sensor_manager)
+        req = requests.post("http://172.17.0.1:5004/institute/add_camera",json=data_to_sensor_manager)
         return render_template("institutehome.html",user = id)
 
 
@@ -250,9 +252,9 @@ def addCorporateCamera(id):
         pickle_out = open(picklepath,"wb")
         api=""
         if(type=="IN"):
-            api="http://127.0.0.1:5004/upload_image_corporate/"+id+"_"+"IN"
+            api="http://172.17.0.1:5004/upload_image_corporate/"+id+"_"+"IN"
         else:
-            api="http://127.0.0.1:5004/upload_image_corporate/"+id+"_"+"OUT"
+            api="http://172.17.0.1:5004/upload_image_corporate/"+id+"_"+"OUT"
 
         data = {"camera_id":camera_id,"gate":gate,"type":type,"api":api}
         
@@ -263,7 +265,7 @@ def addCorporateCamera(id):
         flash("Camera successfully Added")
         data_to_SM = {"corporate_id":id,"cameras":[{"camera_id":camera_id,"type":type}]}
         # data_to_sensor_manager = {"institute_id":id,"cameras" :[{"camera_id":camera_id,"room_id":room}]}
-        req = requests.post("http://localhost:5004/corporate/add_camera",json=data_to_SM)
+        req = requests.post("http://172.17.0.1:5004/corporate/add_camera",json=data_to_SM)
         print(corporatestart)
         if id in corporatestart:
             return render_template("corporatehome.html",user = id, start = 1)
@@ -284,7 +286,7 @@ def addStudents(id):
         file.save( 'images/'+filename)
         os.system("unzip images/"+filename +" -d images")
         os.system("rm images/"+filename)
-        req = requests.post("http://localhost:5003/deployment/service/train_users",json={"org":"institute","id":id,"zip_location":filename.split(".")[0]})
+        req = requests.post("http://172.17.0.1:5003/deployment/service/train_users",json={"org":"institute","id":id,"zip_location":filename.split(".")[0]})
         flash('File successfully uploaded')
     else:
         flash('Allowed file types are zip')
@@ -308,7 +310,7 @@ def addEmployees(id):
         file.save( 'images/'+filename)
         os.system("unzip images/"+filename +" -d images")
         os.system("rm images/"+filename)
-        req = requests.post("http://localhost:5003/deployment/service/train_users",json={"org":"corporate","id":id,"zip_location":filename.split(".")[0]})
+        req = requests.post("http://172.17.0.1:5003/deployment/service/train_users",json={"org":"corporate","id":id,"zip_location":filename.split(".")[0]})
         flash('File successfully uploaded')
     else:
         flash('Allowed file types are zip')
@@ -326,7 +328,7 @@ def removeStudents(id):
     print(students_string)
     students = retrieveListFromString(students_string)
     data_to_dep = {"institute_id":id,"roll_numbers":students}
-    req = requests.post("http://localhost:5003/deployment/service/remove_users",json=data_to_dep)
+    req = requests.post("http://172.17.0.1:5003/deployment/service/remove_users",json=data_to_dep)
     flash("Removed successfully")
     if id in corporatestart:
         return render_template("institutehome.html",user = id, start = 1)
@@ -347,7 +349,7 @@ def removeEmployees(id):
     print(employee_string)
     students = retrieveListFromString(employee_string)
     data_to_dep = {"institute_id":id,"roll_numbers":students}
-    req = requests.post("http://localhost:5003/deployment/service/remove_users",json=data_to_dep)
+    req = requests.post("http://172.17.0.1:5003/deployment/service/remove_users",json=data_to_dep)
     flash("Removed successfully")
 
     if id in corporatestart:
@@ -411,7 +413,8 @@ def addCourse(id):
     for day in coursedays:
         scheduling_data["day"] = day.lower()
         print("\n\nAPI TO SCHEDULING DATA\n",scheduling_data)
-        requests.post("http://localhost:8899/schedule/startSchedule",json=scheduling_data)
+        res = requests.post("http://172.17.0.1:8899/schedule/startSchedule",json=scheduling_data)
+        print(res.json())
     return render_template("institutehome.html",user = id)
 
 @app.route("/iqm/<id>")
@@ -438,7 +441,7 @@ def instituteQuery(id):
     if not startdate or not enddate or not criterion or not coursestring or not studentstring:
         flash("incomplete")
         return redirect(url_for("instituteQuery",id=id))
-        # return render_template("institutequery.html",user=id )
+        # return render_template("institutequerys.html",user=id )
     courses = retrieveListFromString(coursestring)
     students = retrieveListFromString(studentstring)
     query = {}
@@ -457,7 +460,7 @@ def instituteQuery(id):
     request_data["institute_id"]=id
     request_data["query"] = query
     print(request_data)
-    req = requests.post("http://localhost:9874/institute/get_attendance",json=request_data)
+    req = requests.post("http://172.17.0.3:9874/institute/get_attendance",json=request_data)
     out = req.json()
     if(int(criterion)!=0):
         return render_template("instiqueryresults.html",condition=1,data=out)
@@ -497,7 +500,7 @@ def corporateQuery(id):
     request_data["ids"] = employees
     request_data["query"] = query
     print(request_data)
-    req = requests.post("http://localhost:9874/corporate/get_attendance",json=request_data)
+    req = requests.post("http://172.17.0.3:9874/corporate/get_attendance",json=request_data)
     out = req.json()
     if id in corporatestart:
         return render_template("corpqueryresults.html",condition=1,data=out)
@@ -519,4 +522,4 @@ def corporateQuery(id):
 
 
 if __name__ == "__main__":        # on running python app.py
-    app.run(debug=True) 
+    app.run(host="0.0.0.0",debug=True) 

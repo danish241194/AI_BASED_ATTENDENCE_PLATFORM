@@ -44,7 +44,7 @@ def validateAddCameraInput(content) :
 
 def createKafkaTopic(topicName) :
     try:
-        admin_client = KafkaAdminClient(bootstrap_servers=["172.17.0.1:9092"])
+        admin_client = KafkaAdminClient(bootstrap_servers=["localhost:9092"])
         admin_client.create_topics(new_topics=topic_list, validate_only=False)
         topic_list = []
         topic_list.append(NewTopic(name=topicName, num_partitions=1, replication_factor=1))
@@ -74,7 +74,7 @@ def add_camera():
         if errorCode == 'success' :
             instituteToCamera[keyToCamera] = cameraID
             print("keyToCamera ",keyToCamera," unique key ",cameraID)
-            createKafkaTopic(keyToCamera) 
+            # createKafkaTopic(keyToCamera) 
             instituteCamerasOnStream[keyToCamera] = False
         else :
             print("add_camera : " + errorCode + " for value " + str(camera['camera_id']))
@@ -204,7 +204,7 @@ def start_fetching():
 
     if errorCode == 'success' :
         topicName = content["unique_id"]
-        producer = KafkaProducer(bootstrap_servers=["172.17.0.1:9092"],value_serializer=lambda x:dumps(x).encode('utf-8'))
+        producer = KafkaProducer(bootstrap_servers=["localhost:9092"],value_serializer=lambda x:dumps(x).encode('utf-8'))
         thread = threading.Thread(target=streamImages, args=(producer, topicName,))
         thread.start()
 
@@ -331,7 +331,7 @@ def add_camera_corporate():
     if kafkaTopic not in corporates_registered_with_topics.keys():
         corporates_registered_with_topics[kafkaTopic]=True
         corporate_images_for_topic[kafkaTopic]=""
-        producer = KafkaProducer(bootstrap_servers=["172.17.0.1:9092"],value_serializer=lambda x:dumps(x).encode('utf-8'))
+        producer = KafkaProducer(bootstrap_servers=["localhost:9092"],value_serializer=lambda x:dumps(x).encode('utf-8'))
         thread = threading.Thread(target=streamImagesForCorporate, args=(producer, kafkaTopic,))
         thread.start()
 
