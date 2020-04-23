@@ -17,10 +17,9 @@ REGISTRY_PORT = None
 
 deployment_manager_ip="172.17.0.1"
 deployment_manager_port = 5003
+
 class Scheduler:
     def __init__(self):   
-        self.main_service_id_dict={}
-        self.scheduling_ids = {}
 
     def pending_jobs(self):
         while True: 
@@ -83,19 +82,7 @@ class Scheduler:
         return result,schedule_instance_id
 
 
-
-# @app.route('/schedule/cancelSchedule', methods=['GET', 'POST'])
-# def schedule_service():
-#     content = request.json
-#     '''
-#     "schedule_instance_id":"schedule_instance_id"
-   
-#     ""
-#     '''
-#     job_id = sch.scheduling_ids[content["schedule_instance_id"]]
-#     schedule.cancel_job(job_id)
-#     del sch.scheduling_ids[content["schedule_instance_id"]]
-#     return {"result":"OK"}  
+  
 
 @app.route('/health')
 def schedule_health():
