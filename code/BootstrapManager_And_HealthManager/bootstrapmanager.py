@@ -48,6 +48,9 @@ def thread_run(ssh_client1, filename):
 	stdin,stdout,stderr=ssh_client1.exec_command("python3.6 "+filename)
 	print(filename,stderr.readlines())
 
+def send_details_to_registry(service_name,ip,port):
+	req = requests.post("http://172.17.0.1:5533/service_entry",json={"servicename":service_name,"ip":ip,"port":port})
+
 def setup_machine_1(machine):
 
 	ssh_client1 =paramiko.SSHClient()
@@ -67,8 +70,6 @@ def setup_machine_1(machine):
 	thread.start()
 	print("APP RUNNING")
 
-	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_deployment_manager.py",))
-	thread.start()
 
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_scheduler.py",))
 	thread.start()
@@ -77,6 +78,11 @@ def setup_machine_1(machine):
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_sensor_manager.py",))
 	thread.start()
 	print("DEP RUNNING")
+
+	send_details_to_registry("Application Manager",machine["ip"],5000)
+	send_details_to_registry("Deployment Manager",machine["ip"],5003)
+	send_details_to_registry("Sensor Manager",machine["ip"],5004)
+	send_details_to_registry("Scheduler",machine["ip"],8899)
 
 	ftp_client1.close()
 	# ssh_client1.close()
@@ -102,6 +108,10 @@ def setup_machine_2(machine):
 
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_servicelife_cycle.py",))
 	thread.start()
+
+	send_details_to_registry("Server LCM",machine["ip"],3001)
+	send_details_to_registry("Service LCM",machine["ip"],5993)
+
 	# ssh_client1.close()
 
 
@@ -212,7 +222,7 @@ if __name__ == "__main__":
 
 	free_list = startBootstrap()
 
-	other_servies = ["query_manager"]
+	other_servies = ["Query Manager"]
 
 	try:
 		with open("newfreelist.json") as f:
@@ -225,8 +235,8 @@ if __name__ == "__main__":
 		with open("newfreelist.json") as f:
 			content= json.load(f)
 		requests.post("http://172.17.0.2:3001/add_new_machines",json=content)
-	time.sleep(2)
-	# for service in other_servies:
-	# 	requests.get("http://172.17.0.2:5993/run_service/"+service)
+	time.sleep(5)
+	for service in other_servies:
+		requests.get("http://172.17.0.2:5993/run_service/"+service)
 
 	health_manager()

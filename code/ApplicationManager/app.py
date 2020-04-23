@@ -23,6 +23,9 @@ ALLOWED_EXTENSIONS = set(['zip'])
 users = []
 credentials = {}
 corporatestart = []
+def get_ip_port(service):
+    res = requests.get("http://172.17.0.1:5533/get_service_location/"+service)
+    return (res.json())["ip"]+":"+str((res.json())["port"])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -222,7 +225,8 @@ def addInstituteCamera(id):
         pickle_out.close() 
         flash("Camera successfully Added")
         data_to_sensor_manager = {"institute_id":id,"cameras" :[{"camera_id":camera_id,"room_id":room}]}
-        req = requests.post("http://172.17.0.1:5004/institute/add_camera",json=data_to_sensor_manager)
+        sensor_ip_port = get_ip_port("Sensor Manager")
+        req = requests.post("http://"+sensor_ip_port+"/institute/add_camera",json=data_to_sensor_manager)
         return render_template("institutehome.html",user = id)
 
 
@@ -265,7 +269,9 @@ def addCorporateCamera(id):
         flash("Camera successfully Added")
         data_to_SM = {"corporate_id":id,"cameras":[{"camera_id":camera_id,"type":type}]}
         # data_to_sensor_manager = {"institute_id":id,"cameras" :[{"camera_id":camera_id,"room_id":room}]}
-        req = requests.post("http://172.17.0.1:5004/corporate/add_camera",json=data_to_SM)
+        sensor_ip_port = get_ip_port("Sensor Manager")
+
+        req = requests.post("http://"+sensor_ip_port+"/corporate/add_camera",json=data_to_SM)
         print(corporatestart)
         if id in corporatestart:
             return render_template("corporatehome.html",user = id, start = 1)
@@ -413,7 +419,8 @@ def addCourse(id):
     for day in coursedays:
         scheduling_data["day"] = day.lower()
         print("\n\nAPI TO SCHEDULING DATA\n",scheduling_data)
-        res = requests.post("http://172.17.0.1:8899/schedule/startSchedule",json=scheduling_data)
+        scheduler_ip_port = get_ip_port("Scheduler")
+        res = requests.post("http://"+scheduler_ip_port+"/schedule/startSchedule",json=scheduling_data)
         print(res.json())
     return render_template("institutehome.html",user = id)
 
@@ -460,7 +467,8 @@ def instituteQuery(id):
     request_data["institute_id"]=id
     request_data["query"] = query
     print(request_data)
-    req = requests.post("http://172.17.0.3:9874/institute/get_attendance",json=request_data)
+    query_ip_port = get_ip_port("Query Manager")
+    req = requests.post("http://"+query_ip_port+"/institute/get_attendance",json=request_data)
     out = req.json()
     if(int(criterion)!=0):
         return render_template("instiqueryresults.html",condition=1,data=out)
@@ -500,7 +508,9 @@ def corporateQuery(id):
     request_data["ids"] = employees
     request_data["query"] = query
     print(request_data)
-    req = requests.post("http://172.17.0.3:9874/corporate/get_attendance",json=request_data)
+    query_ip_port = get_ip_port("Query Manager")
+
+    req = requests.post("http://"+query_ip_port+"/corporate/get_attendance",json=request_data)
     out = req.json()
     if id in corporatestart:
         return render_template("corpqueryresults.html",condition=1,data=out)

@@ -9,7 +9,6 @@ import sys
 def upload_image(img):
 	with open(img,"rb") as image:
 		
-
 		b64string = base64.b64encode(image.read())
 		req = requests.post("http://172.17.0.1:5004/corporate/upload_image_corporate/"+sys.argv[1],json={"image":b64string})
 		print(req.json())

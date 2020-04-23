@@ -1,3 +1,3 @@
 import os
-os.system("python3.6 corporate_gate_uploading.py ddd_OUT")
+os.system("python3.6 corporate_gate_uploading.py corp_OUT")
 #iiit_OUT   username with OUT
