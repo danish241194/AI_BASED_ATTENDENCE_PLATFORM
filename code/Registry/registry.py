@@ -69,10 +69,10 @@ def fetch(service):
 
 	try:
 		print("+ RETURNING DATA TO ",service)
-		return data[service]
+		return {"res":"ok","service":data[service]}
 
 	except:
-		return "ERROR"
+		return {"res":"error"}
 
 servloc_dict = dict()
 @app.route('/show')

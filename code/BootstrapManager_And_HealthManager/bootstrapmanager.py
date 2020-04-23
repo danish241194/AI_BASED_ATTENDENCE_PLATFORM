@@ -6,7 +6,28 @@ import threading
 import paramiko
 import time
 from texttable import Texttable
-	
+service_ip_mapping={}
+service_port_mapping={}
+
+service_ip_mapping['Application Manager'] = '172.17.0.1'
+service_ip_mapping['Server LCM'] = '172.17.0.2'
+service_ip_mapping['Service LCM'] = '172.17.0.2'
+service_ip_mapping['Deployment Manager'] = '172.17.0.1'
+service_ip_mapping['Query Manager'] = '172.17.0.3'
+service_ip_mapping['Sensor Manager'] = '172.17.0.1'
+service_ip_mapping['Scheduler'] = '172.17.0.1'
+service_ip_mapping['Registry'] = '172.17.0.1'
+
+
+
+service_port_mapping['Application Manager'] = 5000
+service_port_mapping['Server LCM'] = 3001
+service_port_mapping['Service LCM'] = 5993
+service_port_mapping['Deployment Manager'] = 5003
+service_port_mapping['Query Manager'] = 9874
+service_port_mapping['Sensor Manager'] = 5004
+service_port_mapping['Scheduler'] = 8899
+service_port_mapping['Registry'] = 5533
 health_status = {}
 def mycopy(ftp_client,source,target):
 		
@@ -80,7 +101,7 @@ def setup_machine_1(machine):
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_scheduler.py",))
 	thread.start()
 
-	
+
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_sensor_manager.py",))
 	thread.start()
 
@@ -178,6 +199,10 @@ def draw_details():
 		t = Texttable()
 		t.add_rows(details)
 		print(t.draw())
+def thread_start_new(name):
+	time.sleep(3)
+	res = requests.get("http://172.17.0.2:5993/run_service/"+name)
+	service_ip_mapping[name] = (res.json())["ip"]
 
 def health_individual(name,ip,port):
 	global health_status
@@ -188,32 +213,15 @@ def health_individual(name,ip,port):
 		health_status[name]=[name,ip,port,"RUNNING"]
 	except:
 		health_status[name]=[name,ip,port,"DOWN"]
+		thread = threading.Thread(target=thread_start_new, args=(name,))
+		thread.start()
+
+
 
 
 def health_manager():
 	global health_status
-	service_ip_mapping={}
-	service_port_mapping={}
 
-	service_ip_mapping['Application Manager'] = '172.17.0.1'
-	service_ip_mapping['Server LCM'] = '172.17.0.2'
-	service_ip_mapping['Service LCM'] = '172.17.0.2'
-	service_ip_mapping['Deployment Manager'] = '172.17.0.1'
-	service_ip_mapping['Query Manager'] = '172.17.0.3'
-	service_ip_mapping['Sensor Manager'] = '172.17.0.1'
-	service_ip_mapping['Scheduler'] = '172.17.0.1'
-	service_ip_mapping['Registry'] = '172.17.0.1'
-
-
-
-	service_port_mapping['Application Manager'] = 5000
-	service_port_mapping['Server LCM'] = 3001
-	service_port_mapping['Service LCM'] = 5993
-	service_port_mapping['Deployment Manager'] = 5003
-	service_port_mapping['Query Manager'] = 9874
-	service_port_mapping['Sensor Manager'] = 5004
-	service_port_mapping['Scheduler'] = 8899
-	service_port_mapping['Registry'] = 5533
 
 
 	services = ['Scheduler','Application Manager','Query Manager','Server LCM','Deployment Manager','Sensor Manager','Service LCM','Registry']
