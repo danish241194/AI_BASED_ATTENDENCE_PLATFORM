@@ -7,7 +7,12 @@ import time
 import pickle
 import paramiko
 import os
-app = Flask(__name__)
+app = Flask(_name_)
+
+service_files = {}
+service_files["scheduler"]=["run_scheduler.py","scheduler.py"]
+service_files["query_manager"]=["run_query_manager.py","querymanager.py"]
+service_files["sensor_manager"]=["run_sensor_manager.py","sensormanager.py"]
 
 service_files = {}
 service_files["scheduler"]=["run_scheduler.py","scheduler.py"]
@@ -45,7 +50,7 @@ def run_service(service):
 	return machine
 
 
-if __name__ == "__main__": 
+if _name_ == "_main_": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
 	ap.add_argument("-i","--registry_ip",required=True)
@@ -56,3 +61,4 @@ if __name__ == "__main__":
 	REGISTRY_IP = args["registry_ip"]
 	REGISTRY_PORT = args["registry_port"]
 	app.run(debug=True,host = "0.0.0.0",port=int(args["port"])) 
+
