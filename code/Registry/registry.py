@@ -9,8 +9,10 @@ from pathlib import Path
 
 
 import os
-app = Flask(_name_)
-
+app = Flask(__name__)
+@app.route('/health')
+def health():
+    return {"res":"live"}
 
 
 
@@ -144,10 +146,9 @@ def get_service_location(service):
 
 
 
-if _name_ == "_main_": 
+if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
 	args = vars(ap.parse_args())       
 	
 	app.run(host="0.0.0.0",debug=False,port=int(args["port"])) 
-

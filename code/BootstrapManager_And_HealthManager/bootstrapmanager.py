@@ -66,6 +66,12 @@ def setup_machine_1(machine):
 	copyit(ssh_client1,ftp_client1,"../SensorManager",".")
 	copyit(ssh_client1,ftp_client1,"../Schedular",".")
 
+	copyit(ssh_client1,ftp_client1,"../Registry",".")
+
+
+	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_registry.py",))
+	thread.start()
+	time.sleep(5)
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "app.py",))
 	thread.start()
 	print("APP RUNNING")
@@ -74,10 +80,9 @@ def setup_machine_1(machine):
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_scheduler.py",))
 	thread.start()
 
-
+	
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_sensor_manager.py",))
 	thread.start()
-	print("DEP RUNNING")
 
 	send_details_to_registry("Application Manager",machine["ip"],5000)
 	send_details_to_registry("Deployment Manager",machine["ip"],5003)
@@ -197,6 +202,7 @@ def health_manager():
 	service_ip_mapping['Query Manager'] = '172.17.0.3'
 	service_ip_mapping['Sensor Manager'] = '172.17.0.1'
 	service_ip_mapping['Scheduler'] = '172.17.0.1'
+	service_ip_mapping['Registry'] = '172.17.0.1'
 
 
 
@@ -207,9 +213,10 @@ def health_manager():
 	service_port_mapping['Query Manager'] = 9874
 	service_port_mapping['Sensor Manager'] = 5004
 	service_port_mapping['Scheduler'] = 8899
+	service_port_mapping['Registry'] = 5533
 
 
-	services = ['Scheduler','Application Manager','Query Manager','Server LCM','Deployment Manager','Sensor Manager','Service LCM']
+	services = ['Scheduler','Application Manager','Query Manager','Server LCM','Deployment Manager','Sensor Manager','Service LCM','Registry']
 	while True:	
 		time.sleep(5)
 		for service in services:
@@ -230,13 +237,18 @@ if __name__ == "__main__":
 		
 			requests.post("http://172.17.0.2:3001/add_new_machines",json=content)
 	except:
-		print("ERROR WATING FOR 5 Seconds")
+		print("WATING FOR SERVER LIF CYCLE TO BE ACTIVE")
 		time.sleep(5)
 		with open("newfreelist.json") as f:
 			content= json.load(f)
 		requests.post("http://172.17.0.2:3001/add_new_machines",json=content)
+	
+	print("WATING FOR SERVICE LIFE CYCLE TO BE ACTIVE")
+
 	time.sleep(5)
 	for service in other_servies:
 		requests.get("http://172.17.0.2:5993/run_service/"+service)
+
+
 
 	health_manager()
