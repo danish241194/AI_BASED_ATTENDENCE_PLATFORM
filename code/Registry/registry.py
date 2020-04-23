@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 import os
-app = Flask(__name__)
+app = Flask(_name_)
 
 
 
@@ -71,56 +71,14 @@ def fetch(service):
 	except:
 		return "ERROR"
 
-free_list = list()
-@app.route('/add_machine', methods=['GET', 'POST'])
-def add_machine():
-	print("+ REQUEST TO ADD MACHINE FROM PLATOFRM ADMIN MANAGER")
-	content = (request.json)["machines"]
-	try:
-		for key in content.keys():
-			free_list.append(content[key])
-			print("-\t ",key," : ",content[key])
-			print("+ RETURNING RESPONSE OK TO PLATFORM ADMIN MANAGER")
-
-		return {"Response":"OK"}
-	except:
-		print("+ RETURNING RESPONSE OK TO PLATFORM ADMIN MANAGER")
-		return {"Response":"ERROR"}
-	'''
-		{
-			machines:[
-				machine_1:{
-							"ip":ip,
-							"port":port
-							"username":username,
-							"password":password
-						},
-				machine_2:{
-							"ip":ip,
-							"port":port,
-							"username":username,
-							"password":password
-					}
-				]
-		}
-	'''
-	'''
-	add this in free list
-	'''
-	'''
-		return ack
-	'''
-
-    
-
 servloc_dict = dict()
 @app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
-
+	global servloc_dict
 	content = request.json
 	print("+ REQUEST TO ENTER ADDRESS OF ",content["servicename"])
 
-	servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] ,"username":content["username"] , "password":content["password"] }
+	servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] }
 	print("\t- ",content["servicename"])
 
 	'''
@@ -148,7 +106,7 @@ def service_entry():
 @app.route('/get_service_location/<service>')
 def get_service_location(service):
 	print("+ REQUEST TO GET ADDRESS OF SERVICE ",service)
-
+	global servloc_dict
 	'''
 		OUTPUT
 		{
@@ -222,9 +180,9 @@ def display_free_list_and_server_loc():
 
 
 
-if __name__ == "__main__": 
+if _name_ == "_main_": 
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p","--port",required=True)
 	args = vars(ap.parse_args())       
 	
-	app.run(debug=True,port=int(args["port"])) 
+	app.run(host="0.0.0.0",debug=False,port=int(args["port"]))
