@@ -89,9 +89,9 @@ def setup_machine_1(machine):
 	copyit(ssh_client1,ftp_client1,"../Registry",".")
 
 
-	thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_registry.py",))
-	thread.start()
-	time.sleep(5)
+	# thread = threading.Thread(target=thread_run, args=(ssh_client1, "run_registry.py",))
+	# thread.start()
+	# time.sleep(5)
 	thread = threading.Thread(target=thread_run, args=(ssh_client1, "app.py",))
 	thread.start()
 	print("APP RUNNING")

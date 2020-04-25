@@ -34,22 +34,23 @@ def store(service):
 		f.close()
 
 
+
+	# try:
 	data = pickle.loads(open(registry_path,"rb").read())
 
-	try:
-	    data[service] = content
-	    # print(data)
-	    f = open(registry_path,"wb")
-	    f.write(pickle.dumps(data))
-	    f.close()
+	data[service] = content
+    # print(data)
+	f = open(registry_path,"wb")
+	f.write(pickle.dumps(data))
+	f.close()
 
-	    print("- RETURNING RESPONSE OK TO ",service)
+	print("- RETURNING RESPONSE OK TO ",service)
 
-	    return {"Response":"OK"}
+	return {"Response":"OK"}
 
-	except:
-		print("- RETURNING RESPONSE ERROR TO ",service)
-		return {"Response":"ERROR"}
+	# except:
+	# 	print("- RETURNING RESPONSE ERROR TO ",service)
+	# 	return {"Response":"ERROR"}
 
 	"""
 	content

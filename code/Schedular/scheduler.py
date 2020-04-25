@@ -108,11 +108,14 @@ def schedule_service():
     ""
     '''
     sch.schedule_requests.append(content)        
-    f = open("scheduler_data.pickle","wb")
+    # f = open("scheduler_data.pickle","wb")
+    # data = {"data":sch.schedule_requests}
+    # f.write(pickle.dumps(data))
+    # f.close()
     data = {"data":sch.schedule_requests}
-    f.write(pickle.dumps(data))
-    f.close()
-    
+    res = requests.post('http://172.17.0.1:5533/store/scheduler', json=data)
+
+
     result,schedule_instance_id = sch.schedule(content)
 
     return {"result":"OK","schedule_instance_id":schedule_instance_id}
@@ -140,8 +143,10 @@ if __name__ == "__main__":
     sch = Scheduler()
     sch.run()
     try:
-        data = pickle.loads(open("scheduler_data.pickle","rb").read())
-        sch.schedule_requests = data["data"]
+        res = requests.get('http://172.17.0.1:5533/fetch/scheduler')
+        data = res.json()
+        # data = pickle.loads(open("scheduler_data.pickle","rb").read())
+        sch.schedule_requests = data["service"]["data"]
         # print("scheduling previous ones again",len(sch.schedule_requests))
         print(sch.schedule_requests)
         for schedule_ in sch.schedule_requests:
@@ -149,15 +154,6 @@ if __name__ == "__main__":
             sch.schedule(schedule_)
     except:
         print("NO previous file")
-    # res = requests.get('http://172.17.0.1:5533/fetch/scheduler')
-    # content = res.json()
-    # if content["res"]=="ok":
-    #     schedules = content["service"]["schedules"]
-    #     print("Previous Content")
-    #     for schedule_ in schedules:
-    #         res = requests.post("http://172.17.0.1:8899/schedule/startSchedule",json=schedule)
-
-    #     sch.schedule_requests = schedules
 
 
     app.run(debug=False,host = "0.0.0.0",port=int(args["port"])) 
