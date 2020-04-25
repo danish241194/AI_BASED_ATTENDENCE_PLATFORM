@@ -63,11 +63,12 @@ def store(service):
 @app.route('/fetch/<service>')
 def fetch(service):
 	print("+ REQUEST TO FETCH FROM ",service)
-	registry_path = "registry_data/registry.pickle"
-
-	data = pickle.loads(open(registry_path,"rb").read())
-
 	try:
+		registry_path = "registry_data/registry.pickle"
+
+		data = pickle.loads(open(registry_path,"rb").read())
+
+	
 		print("+ RETURNING DATA TO ",service)
 		return {"res":"ok","service":data[service]}
 

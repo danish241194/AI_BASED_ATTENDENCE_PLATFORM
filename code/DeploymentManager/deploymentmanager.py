@@ -23,6 +23,7 @@ def health():
 def deploy_attendence():
 	content = request.json
 	req_content = content
+	print(req_content)
 	"""
 	content = {"org":"institute","institute_id":institute_id,"attendence_minutes":attendence_minutes,"room_id":room_id,"course_no":course_no}
 	"""

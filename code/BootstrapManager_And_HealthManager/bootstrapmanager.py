@@ -86,7 +86,6 @@ def setup_machine_1(machine):
 	copyit(ssh_client1,ftp_client1,"../DeploymentManager",".")
 	copyit(ssh_client1,ftp_client1,"../SensorManager",".")
 	copyit(ssh_client1,ftp_client1,"../Schedular",".")
-
 	copyit(ssh_client1,ftp_client1,"../Registry",".")
 
 
@@ -256,7 +255,6 @@ if __name__ == "__main__":
 	time.sleep(5)
 	for service in other_servies:
 		requests.get("http://172.17.0.2:5993/run_service/"+service)
-
 
 
 	health_manager()

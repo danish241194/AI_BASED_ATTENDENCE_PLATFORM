@@ -15,6 +15,9 @@ import numpy
 import numpy as np
 from datetime import datetime
 
+def get_ip_port(service):
+    res = requests.get("http://172.17.0.1:5533/get_service_location/"+service)
+    return (res.json())["ip"]+":"+str((res.json())["port"])
 
 def detect_students(attendence,course_enrolled_list,data,frame):
 	print("+ Finding matches")
@@ -83,14 +86,14 @@ for name in course_enrolled_students:
 
 #ask for kafkatopic
 
-res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/institute/get_camera_instance",json={"institute_id":args["institute_id"],"room_id":args["room_id"]})
+res = requests.post("http://"+get_ip_port("Sensor Manager")+"/institute/get_camera_instance",json={"institute_id":args["institute_id"],"room_id":args["room_id"]})
 kafka_topic = res.json()["topic"]
 print("kafka_topic ",kafka_topic)
 # kafka_topic="input_to_camera"
 
 
 #call start fetching
-res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/institute/start_fetching",json={"institute_id":args["institute_id"],"unique_id":kafka_topic})
+res = requests.post("http://"+get_ip_port("Sensor Manager")+"/institute/start_fetching",json={"institute_id":args["institute_id"],"unique_id":kafka_topic})
 
 consumer  = KafkaConsumer(
 	kafka_topic,bootstrap_servers=['localhost:9092'],
@@ -119,7 +122,7 @@ for message in consumer:
 		break
 
 #stop fetching data
-res = requests.post("http://"+SENSOR_MANAGER_IP+":"+SENSOR_MANAGER_PORT+"/institute/stop_fetching",json={"institute_id":args["institute_id"],"unique_id":kafka_topic})
+res = requests.post("http://"+get_ip_port("Sensor Manager")+"/institute/stop_fetching",json={"institute_id":args["institute_id"],"unique_id":kafka_topic})
 
 
 print("ATTENDENCE ",attendence)
@@ -132,6 +135,6 @@ query_manager_data = {
 		"date":str(datetime.today().strftime('%d-%m-%Y'))
 	}
 
-res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])
+res = requests.get("http://"+get_ip_port("Server LCM")+"/serverlcm/de_allocate_user_machine/"+args["container_id"])
 
-req = requests.post("http://172.17.0.3:"+QUERY_MANAGER_PORT+"/institute/add_attendance",json=query_manager_data)
+req = requests.post("http://"+get_ip_port("Query Manager")+"/institute/add_attendance",json=query_manager_data)

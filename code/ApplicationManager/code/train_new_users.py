@@ -5,6 +5,12 @@ import pickle
 import os
 import requests
 import json
+
+
+def get_ip_port(service):
+    res = requests.get("http://172.17.0.1:5533/get_service_location/"+service)
+    return (res.json())["ip"]+":"+str((res.json())["port"])
+
 DEPLOYMENT_IP = "172.17.0.1"
 DEPLOYMENT_PORT = "5003"
 SERVERLCM_IP = "172.17.0.2"
@@ -47,4 +53,4 @@ else:
 print("new encodings keys" ,data.keys())
 
 res = requests.post("http://"+DEPLOYMENT_IP+":"+DEPLOYMENT_PORT+"/deployment/service/take_new_encodings/"+args["id"],json=data)
-res = requests.get("http://"+SERVERLCM_IP+":"+SERVERLCM_PORT+"/serverlcm/de_allocate_user_machine/"+args["container_id"])
+res = requests.get("http://"+get_ip_port("Server LCM")+"/serverlcm/de_allocate_user_machine/"+args["container_id"])

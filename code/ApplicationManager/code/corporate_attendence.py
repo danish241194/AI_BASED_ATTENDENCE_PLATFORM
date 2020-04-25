@@ -46,6 +46,10 @@ def detect_employees(attendence,data,frame):
 			attendence[name]=1
 	return
 
+def get_ip_port(service):
+    res = requests.get("http://172.17.0.1:5533/get_service_location/"+service)
+    return (res.json())["ip"]+":"+str((res.json())["port"])
+
 def send_attendence_to_QM(attendence,type_,corporate_id):
 	entry_exit_list = list(attendence.keys())
 	data_for_QM = {"corporate_id":corporate_id,"type":type_,"ids":entry_exit_list}
@@ -54,7 +58,8 @@ def send_attendence_to_QM(attendence,type_,corporate_id):
 	data_for_QM["date"] = date_current
 	data_for_QM["time"] = time
 	print(data_for_QM)
-	req = requests.post("http://172.17.0.3:"+QUERY_MANAGER_PORT+"/corporate/add_attendance",json=data_for_QM)
+
+	req = requests.post("http://"+get_ip_port("Query Manager")+"/corporate/add_attendance",json=data_for_QM)
 
 	"""
 	content

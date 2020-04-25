@@ -9,6 +9,7 @@ import json
 import requests
 import argparse
 from datetime import datetime
+import pickle
 
 app = Flask(__name__)
 
@@ -18,14 +19,17 @@ REGISTRY_PORT = None
 deployment_manager_ip="172.17.0.1"
 deployment_manager_port = 5003
 
-schedule_requests = []
 class Scheduler:
     def __init__(self):   
-        pass
+        self.schedule_requests = []
+
     def pending_jobs(self):
         while True: 
             schedule.run_pending() 
             time.sleep(10)
+            # data = {"schedules":self.schedule_requests}
+            # res = requests.post('http://172.17.0.1:5533/store/scheduler', json=data)
+
 
     def send_request_to_deployment_manager(self,institute_id,attendence_minutes,room_id,course_no):
         response = {"org":"institute","institute_id":institute_id,"attendence_minutes":attendence_minutes,"room_id":room_id,"course_no":course_no}
@@ -34,6 +38,7 @@ class Scheduler:
     
     def run(self):
         t1 = threading.Thread(target=self.pending_jobs) 
+        t1.daemon = True
         t1.start() 
 
     def run_service(self,service_detail):
@@ -86,12 +91,13 @@ class Scheduler:
 @app.route('/health')
 def schedule_health():
     return {"res":"live"}
-    
+sch = None
+
 @app.route('/schedule/startSchedule', methods=['GET', 'POST'])
 def schedule_service():
     global schedule_requests
     content = request.json
-    schedule_requests.append(content)
+    # sch.schedule_requests.append(content)
     '''
     "institue_id":"ins id"
     "room_id":"room id"
@@ -101,21 +107,29 @@ def schedule_service():
     "attendence_minutes":10
     ""
     '''
+    sch.schedule_requests.append(content)        
+    f = open("scheduler_data.pickle","wb")
+    data = {"data":sch.schedule_requests}
+    f.write(pickle.dumps(data))
+    f.close()
     
     result,schedule_instance_id = sch.schedule(content)
 
     return {"result":"OK","schedule_instance_id":schedule_instance_id}
 
-def data_dumping_service():
-    global schedule_requests
-    while True:
-        time.sleep(5) #wait for 5 seconds then upload data in registry
-        data = {"schedules":schedule_requests}
-        res = requests.post('http://172.17.0.1:5533/store/scheduler', json=data)
 
-sch = None
         
-            
+
+    # global schedule_requests
+    # print("Logging Service Started")
+    # while True:
+    #     time.sleep(5) #wait for 5 seconds then upload data in registry
+    #     if sch!=None:
+    #         data = {"schedules":sch.schedule_requests}
+    #         res = requests.post('http://172.17.0.1:5533/store/scheduler', json=data)
+
+
+           
 if __name__ == "__main__": 
     ap = argparse.ArgumentParser()
     ap.add_argument("-p","--port",required=True)
@@ -125,21 +139,28 @@ if __name__ == "__main__":
     Myport = args["port"]
     sch = Scheduler()
     sch.run()
+    try:
+        data = pickle.loads(open("scheduler_data.pickle","rb").read())
+        sch.schedule_requests = data["data"]
+        # print("scheduling previous ones again",len(sch.schedule_requests))
+        print(sch.schedule_requests)
+        for schedule_ in sch.schedule_requests:
+            print(schedule_)
+            sch.schedule(schedule_)
+    except:
+        print("NO previous file")
+    # res = requests.get('http://172.17.0.1:5533/fetch/scheduler')
+    # content = res.json()
+    # if content["res"]=="ok":
+    #     schedules = content["service"]["schedules"]
+    #     print("Previous Content")
+    #     for schedule_ in schedules:
+    #         res = requests.post("http://172.17.0.1:8899/schedule/startSchedule",json=schedule)
+
+    #     sch.schedule_requests = schedules
 
 
-    res = requests.get('http://172.17.0.1:5533/fetch/scheduler')
-    content = res.json()
-    if content["res"]=="ok":
-        schedules = content["service"]["schedules"]
-        for schedule in schedules:
-            sch.schedule(schedule)
-
-        schedule_requests = schedules
-
-    t1 = threading.Thread(target=data_dumping_service) 
-    t1.start()
-
-    app.run(debug=True,host = "0.0.0.0",port=int(args["port"])) 
+    app.run(debug=False,host = "0.0.0.0",port=int(args["port"])) 
 
 
 
