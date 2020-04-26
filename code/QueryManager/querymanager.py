@@ -10,6 +10,7 @@ import datetime
 app = Flask(__name__)
 
 institute_attendance = {}
+corporate_attendance = {}
 
 '''
 data structure format for institute_attendance
@@ -55,8 +56,9 @@ REGISTRY_IP = None
 REGISTRY_PORT = None
 @app.route('/institute/add_attendance', methods=['GET', 'POST'])
 def add_attendance():
-	global institute_attendance
+	global institute_attendance,corporate_attendance
 	content = request.json
+
 	"""
 	content
 	{
@@ -70,6 +72,8 @@ def add_attendance():
 		"date":"DD-MM-YYYY"
 	}
 	"""
+ 
+
 	content_dict = content
 
 	ins_id = content_dict["institute_id"]
@@ -83,6 +87,9 @@ def add_attendance():
 	if course not in institute_attendance[ins_id]:
 		institute_attendance[ins_id][course] = {}
 	institute_attendance[ins_id][course][date] = student_attendance 
+
+	data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
+	res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
 
 	return {"Response":"OK"}
 @app.route('/institute/show')
@@ -232,7 +239,6 @@ corporate_attendance = {
 }
 '''
 
-corporate_attendance = {}
 @app.route('/corporate/show')
 def show_corp():
 	global corporate_attendance
@@ -241,7 +247,7 @@ def show_corp():
 
 @app.route('/corporate/add_attendance', methods=['GET', 'POST'])
 def add_attendance_corporate():
-	global corporate_attendance
+	global corporate_attendance,institute_attendance
 	content = request.json
 	"""
 	content
@@ -285,7 +291,8 @@ def add_attendance_corporate():
 			duration_to_be_added = (out_time - last_in_time).seconds
 
 			corporate_attendance[corporate_id][date][emp]["duration"] += duration_to_be_added			
-
+	data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
+	res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
 	return {"Response":"OK"}
 
 
@@ -428,6 +435,14 @@ if __name__ == "__main__":
 	# ap.add_argument("-x","--registry_port",required=True)
 	args = vars(ap.parse_args())       
 	
+	try:
+		res = requests.get('http://172.17.0.1:5533/fetch/query_manager')
+		institute_attendance = data["institute_attendance"]
+		corporate_attendance = data["corporate_attendance"]
+	except:
+		print("NO previous Data")
+		pass
+
 	"""
 	REGISTRY_IP = args["registry_ip"]
 	REGISTRY_PORT = args["registry_port"]
