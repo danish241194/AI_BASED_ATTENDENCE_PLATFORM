@@ -1,0 +1,67 @@
+<!doctype html>
+
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<style>
+table, td, th {  
+  border: 1px solid #70153d;
+  text-align: left;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px;
+  background-color:#faebee;
+}
+
+th, td {
+  padding: 15px;
+  text-align: center;
+}
+tr {text-align: center;}
+
+</style>
+
+<body style="height: 100%; width: 100%;background: url('../static/c22.jpg') no-repeat center top;">
+    <h3 style="text-align: center; margin-top: 3%; color: #70153d;"><u>CAMERA LIST</u></h3>
+    <div class="container" style="height: 100%; width: 100%;">
+        <div class="row" style="height: 100%; width: 100%;">
+            <div class="col-sm-2" style="height: 100%;">
+            </div>
+            <div class="col-sm-8" style="height: 100%; margin-top: 2%;">
+                <table class="table table-striped" id="coursetable_id">
+                    <thead style="color: #226b78;">
+                      <tr>
+                        <th style="width: 25%; text-align: center;">CAMERA ID</th>
+                        <th style="width: 25%; text-align: center">GATE</th>
+                        <th style="width: 25%; text-align: center">TYPE</th>
+                        <th style="width: 25%; text-align: center">API</th>
+                      </tr>
+                    </thead>
+                    <tbody style="background-color:#faebee ;">
+                        {% for key, value in data.items() %}
+                            <!-- {{ key }} : {{ value }} -->
+                            {% for each in value %}
+                                <!-- {{each}}    -->
+                                <tr>{% for k, v in each.items() %}
+                                    <td>{{v}}</td>
+                                {% endfor %}</tr>        
+                            {% endfor %}
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-sm-2" style="height: 100%;">
+            </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
