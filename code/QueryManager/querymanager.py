@@ -79,7 +79,7 @@ def add_attendance():
 	ins_id = content_dict["institute_id"]
 	course = content_dict["course"]
 	#converting date into python module "datetime" format before storing
-	date = datetime.datetime.strptime(content_dict["date"], '%d-%m-%Y')
+	date = content_dict["date"]
 	student_attendance = content_dict["attendance"]
 
 	if ins_id not in institute_attendance:
@@ -92,6 +92,7 @@ def add_attendance():
 	res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
 
 	return {"Response":"OK"}
+
 @app.route('/institute/show')
 def show():
 	global institute_attendance
@@ -158,8 +159,8 @@ def get_attendance():
 	course_list = content_dict["query"]["courses"]
 	student_list = content_dict["query"]["students"]
 	#converting date into python module "datetime" format before storing
-	st_date = datetime.datetime.strptime(content_dict["query"]["start_date"], '%d-%m-%Y')
-	e_date = datetime.datetime.strptime(content_dict["query"]["end_date"], '%d-%m-%Y')
+	start_date = datetime.datetime.strptime(content_dict["query"]["start_date"], '%d-%m-%Y')
+	end_date = datetime.datetime.strptime(content_dict["query"]["end_date"], '%d-%m-%Y')
 
 	condition = content_dict["query"]["condition"]
 
@@ -172,23 +173,22 @@ def get_attendance():
 		return json.dumps(output_dict)
 
 	if condition == None:
-
 		for course in course_list:
 			if course in institute_attendance[ins_id]:
 				output_dict[course] = {}
-				start_date = st_date
-				end_date = e_date
 
-				while start_date <= end_date:
-					if start_date in institute_attendance[ins_id][course]:
+				date = start_date
+				while date <= end_date:
+					#converting date from datetime format to dd-mm-yy format for finding in dictionary
+					date_in_str = date.strftime('%d-%m-%Y')
+					if date_in_str in institute_attendance[ins_id][course]:
 						present_student_list = []
-						attendance_dict = institute_attendance[ins_id][course][start_date]
+						attendance_dict = institute_attendance[ins_id][course][date_in_str]
 						for student, val in attendance_dict.items():
 							if val == 1 and (student in student_list or student_list[0] == "ALL"):
 								present_student_list.append(student)
-						#converting datetime format into "dd-mm-yyyy" format
-						output_dict[course][start_date.strftime('%d-%m-%Y')] = present_student_list
-					start_date += datetime.timedelta(days=1)
+						output_dict[course][date_in_str] = present_student_list
+					date += datetime.timedelta(days=1)
 
 	else:
 		cond_str = list(condition)[0]
@@ -197,22 +197,23 @@ def get_attendance():
 		for course in course_list:
 			if course in institute_attendance[ins_id]:
 				output_dict[course] = []
-				start_date = st_date
-				end_date = e_date
-
 				classes_attended_per_student = {}
 				num_classes = 0
-				while start_date <= end_date:
-					if start_date in institute_attendance[ins_id][course]:
+
+				date = start_date
+				while date <= end_date:
+					#converting date from datetime format to dd-mm-yy format for finding in dictionary
+					date_in_str = date.strftime('%d-%m-%Y')
+					if date_in_str in institute_attendance[ins_id][course]:
 						num_classes += 1
 						present_student_list = []
-						attendance_dict = institute_attendance[ins_id][course][start_date]
+						attendance_dict = institute_attendance[ins_id][course][date_in_str]
 						for student, val in attendance_dict.items():
 							if val == 1 and (student in student_list or student_list[0] == "ALL"):
 								if student not in classes_attended_per_student:
 									classes_attended_per_student[student] = 0
 								classes_attended_per_student[student] += 1
-					start_date += datetime.timedelta(days=1)
+					date += datetime.timedelta(days=1)
 
 				for student, classes_attended in classes_attended_per_student.items():
 					if cond_str == "greater_than":
@@ -260,7 +261,7 @@ def add_attendance_corporate():
 	}
 	"""
 	content_dict = content
-	print(content)
+
 	corporate_id = content_dict["corporate_id"]
 	timestamp_type = content_dict["type"]
 	empid_list = content_dict["ids"]
@@ -268,7 +269,6 @@ def add_attendance_corporate():
 	time = content_dict["time"]
 
 	timestamp = datetime.datetime.strptime(date + " " + time, '%d-%m-%Y %H:%M:%S')
-	date = datetime.datetime.strptime(date, '%d-%m-%Y')
 
 	if corporate_id not in corporate_attendance:
 		corporate_attendance[corporate_id] = {}
@@ -385,15 +385,17 @@ def get_attendance_corporate():
 	output_dict = {}
 
 	if condition is None:
-		while start_date <= end_date:
-			if start_date in corporate_attendance[corporate_id]:
+		date = start_date
+		while date <= end_date:
+			date_in_str = date.strftime('%d-%m-%Y')
+			if date_in_str in corporate_attendance[corporate_id]:
 				present_emp_list = []
-				for emp in corporate_attendance[corporate_id][start_date]:
-					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][start_date][emp]["duration"] > effective_time:
+				for emp in corporate_attendance[corporate_id][date_in_str]:
+					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][date_in_str][emp]["duration"] > effective_time:
 						present_emp_list.append(emp)
-				output_dict[start_date.strftime('%d-%m-%Y')] = present_emp_list
+				output_dict[date_in_str] = present_emp_list
 
-			start_date += datetime.timedelta(days=1)
+			date += datetime.timedelta(days=1)
 
 	else:
 		output_dict["ids"] = []
@@ -402,17 +404,18 @@ def get_attendance_corporate():
 		days_present_per_employee = {}
 		num_working_days = 0
 
-		while start_date <= end_date:
-			
-			if start_date in corporate_attendance[corporate_id]:
+		date = start_date
+		while date <= end_date:
+			date_in_str = date.strftime('%d-%m-%Y')
+			if date_in_str in corporate_attendance[corporate_id]:
 				num_working_days += 1
-				for emp in corporate_attendance[corporate_id][start_date]:
-					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][start_date][emp]["duration"] > effective_time:
+				for emp in corporate_attendance[corporate_id][date_in_str]:
+					if (empid_list[0] == "ALL" or emp in empid_list) and corporate_attendance[corporate_id][date_in_str][emp]["duration"] > effective_time:
 						if emp not in days_present_per_employee:
 							days_present_per_employee[emp] = 0
 						days_present_per_employee[emp] += 1
 
-			start_date += datetime.timedelta(days=1)
+			date += datetime.timedelta(days=1)
 
 		for emp in days_present_per_employee:
 			if int((days_present_per_employee[emp]/num_working_days)*100) > parameter:
