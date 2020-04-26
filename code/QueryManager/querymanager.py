@@ -34,13 +34,13 @@ institute_attendance = {
 Example
 
 institute_attendance = {
-	"iiit": {
-		"SMAI": {
-			<datetime format>: {
+	"iiit_1": {
+		"cs105": {
+			"20-02-2020": {
 				"2018201073": 1,
 				"2018201070": 0
 			},
-			<datetime format>: {
+			"27-02-2020": {
 				"2018201070": 1,
 				"2018201073": 0
 			}
