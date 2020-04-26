@@ -1,0 +1,208 @@
+<!doctype html>
+
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+	<meta charset="utf-8">
+	<title>Institute Home</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<style type="text/css">
+		.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+			background-color:#fccfd7;
+			margin: 0%;
+			color:#70153d;
+		}
+		a {
+		color:#226b78;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			color:#226b78;
+			text-decoration: @link-hover-decoration;
+		}
+
+		&:focus {
+			.tab-focus();
+		}
+		}
+
+	.container {
+		width: 50%;
+	}
+
+		b{
+			font-size: 14px;
+		}
+
+	</style>
+</head>
+
+<body style="height: 100%; width: 100%; text-align:left; font-size:large; background: url('../static/c22.jpg') no-repeat ;background-attachment: fixed;
+  background-size: cover;">
+<div class="container" style=" width: 100%">
+	<div class="row">
+		<div class="col-sm-2"></div>
+		<div class="col-sm-8">
+			<ul class="nav nav-pills" style="padding:0%; margin-top: 5%; background-color:#faebee; border-radius: 8px;width: 100%;">
+				<li class="active" style="width: 17%;"><a data-toggle="pill" href="#add_students" style="  text-align: center;"><b style="font-size: 14px">Add Students</b></a></li>
+				<li style="width: 21%;"><a data-toggle="pill" href="#remove_students" style="text-align: center;"><b style="font-size: 14px">Remove Students</b></a></li>
+				<li style="width: 16%;"><a data-toggle="pill" href="#add_courses" style=" text-align: center;"><b style="font-size: 14px">Add Courses</b></a></li>
+				<li style="width: 16%;"><a data-toggle="pill" href="#add_camera" style="  text-align: center;"><b style="font-size: 14px">Add Camera</b></a></li>
+				<li style="width: 14%;"><a data-toggle="pill" href="#queries" style=" text-align: center;"><b style="font-size: 14px">Queries</b></a></li>
+				<li style="width: 14%;"><a href="/" style=" text-align: center;"><b style="font-size: 14px">LogOut</b></a></li>
+			</ul>      	
+		</div>
+		<div class="col-sm-2"></div>
+	</div>
+</div>
+<div class="container" style="width: 100%">
+	<div class="row" style="height: 100%; width: 100%">
+			<div class="col-sm-2"></div>
+			<div class="col-sm-8 tab-content" style="height: 100%;">
+				<div id="add_students" class=" tab-pane fade in active" style="height: 100%; background-color: transparent;padding:2%" >
+					<div class = "container"style=" width: 45%; height:100% ; box-shadow: 2px 2px 5px grey;  border-radius:8px; background-color:#faebee;">
+						<form method="post" action="/{{user}}" enctype="multipart/form-data">
+							<div class="form-group" style="margin-top: 15%">
+								<p style="color:#226b78; margin-left: 1%" for="exampleFormControlFile1"><b>Upload zip file</b></p>
+								<input style="color:#226b78; font-size: 14px; margin-top: 5%" type="file" name ="file" class="form-control-file" id="customFile" aria-describedby="imagehelp" placeholder="Enter image">
+								</div>
+								<button type="submit" class="btn btn-primary" style="width: 30%;  float: right; background-color:#78a8b0; border-color:#10464f; margin-bottom: 5%; margin-top: 18%; margin-right: 8%" ><b style="color: #10464f; font-size: 14px;">Add</b></button>
+						</form>    
+					</div>
+				</div>
+				<div id="remove_students" class="tab-pane fade" style="height: 100%; background-color: transparent;padding: 2%">
+					<div class="container" style="width:45%; height: 100%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee;">
+						<p style="text-align: center;color:#226b78; margin-top: 15%"><b>Comma seperated Roll numbers</b></p>
+						<form action="/removestudents/{{user}}" method="POST">
+							<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+								<input type="text" class="form-control" placeholder="Enter Roll numbers" id="remove_studentlist_id" name="removelist" style="width: 40%; margin-left: 0%">
+							</div>
+							<button type="submit" class="btn btn-primary" style="width: 30%; float: right; background-color: #78a8b0; border-color:#10464f; margin-top:18%;margin-right: 8%; margin-bottom: 5% ;color:#10464f ;font-size: 14px;" ><b>Remove</b></button>
+						</form>
+					</div>
+				</div>
+
+
+				<div id="add_courses" class="tab-pane fade" style="height: 100%;background-color: transparent;padding: 2%">
+					<div class="container" style="width: 45%; height: 160%; ;box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee">
+					<form action="/addcourse/{{user}}" method="POST">
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+							<input type="text" class="form-control" placeholder="Course name" id="course_id" name="course" style="width: 40%;margin-left: 0%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+							<input type="text" class="form-control" placeholder="Room number" id="course_room_id" name="room" style="width: 40%;  margin-left: 0%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%;margin-top: 5%">
+							<input type="text" class="form-control" placeholder="Enter Roll numbers" id="course_studentlist_id" name="student_list" style="width: 40%;  margin-left: 0%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 18%;font-size: 14px">
+							<div class="checkbox">
+								<label><input type="checkbox" value="sunday" name="day" id="sunday_id" ><a style="color: #10464f">Sunday</a></label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" value="monday" name="day" id="monday_id"><a style="color: #10464f">Monday</a></label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" value="tuesday" name="day" id="tuesday_id"><a style="color: #10464f">Tuesday</a></label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" value="wednesday" name="day" id="wednesday_id"><a style="color: #10464f">Wednesday</a></label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" value="thursday" name="day" id="thursday_id"><a style="color: #10464f">Thursday</a></label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" value="friday" name="day" id="friday_id"><a style="color: #10464f">Friday</a></label>
+							</div>
+							<div class="checkbox">
+								<label><input type="checkbox" value="saturday" name="day" id="saturday_id"><a style="color: #10464f">Saturday</a></label>
+							</div> 
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+							<input type="time" class="form-control" placeholder="Attendance time" id="time_id" name="time" style="width: 40%;  margin-left: 0%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%;margin-top: 5%">
+							<input type="number" class="form-control" placeholder="Duration(mins)" id="duration_id" name="duration" style="width: 40%;  margin-left: 0%">
+						</div>
+	
+						<button type="submit"   class="btn btn-primary" style="width: 38%; float: right;  background-color: #78a8b0; border-color:#10464f; margin-top:5%;margin-right: 8% ; margin-bottom: 5%; color:#10464f ;font-size: medium;" ><b>Add course</b></button>
+						
+					</form>
+					{% with messages = get_flashed_messages() %}
+						{% for message in messages %}
+							{% if message %}
+								{% if message == "Missing fields" %}
+									<script>alert("Missing fields")</script>
+								{% endif %}
+								
+								{% if message == "nocameras" %}
+									<script>alert("No cameras registered for user")</script>
+								{% endif %}
+								{% if message == "nocourses" %}
+									<script>alert("No courses registered for user")</script>
+								{% endif %}
+								{% if message == "Course registered" %}
+									<script>alert("Course successfully registered")</script>
+								{% endif %}
+								{% if message == "No file part" %}
+									<script>alert("No file part")</script>
+								{% endif %}
+								{% if message == "No file selected for uploading" %}
+									<script>alert("No file selected for uploading")</script>
+								{% endif %}
+								{% if message == "File successfully uploaded" %}
+									<script>alert("File successfully uploaded")</script>
+								{% endif %}
+								{% if message == "Allowed file types are zip" %}
+									<script>alert("Allowed file types are zip")</script>
+								{% endif %}
+								{% if message == "Removed successfully" %}
+									<script>alert("Removed successfully")</script>
+								{% endif %}
+								{% if message == "Camera successfully Added" %}
+									<script>alert("Camera successfully Added")</script>
+								{% endif %}
+
+							{% endif %}
+						{% endfor %}
+					{% endwith %}
+				</div>
+				</div>
+
+				<div id="add_camera" class="tab-pane fade" style="height: 100%;background-color: transparent;padding: 2%">
+				<div class="container" style="width: 45%; height: 100%;box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee">
+					<form action="/addinstitutecamera/{{user}}" method="POST">
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 15%">
+							<input type="text" class="form-control" placeholder="Room number" id="camera_room_id" name="room" style="width: 40%;  margin-left: 0%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+							<input type="text" class="form-control" placeholder="Camera id" id="camera_id" name="camera_id" style="width: 40%;  margin-left: 0%">
+						</div>
+						<button type="submit" class="btn btn-primary" style="width:30%; float: right; background-color: #78a8b0; border-color: #10464f; margin-top: 15%; margin-right: 8%; margin-bottom: 5%;color: #10464f" ><b style="font-size: 14px">Add</b></button>
+					</form>
+					
+				</div>
+				</div>
+				<div id="queries" class="tab-pane fade" style="height: 100%;background-color: transparent;padding: 2%;">
+					<div class="container" style="width: 45%; height: 100%;box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee">
+					<form action="/iqm/{{user}}">
+						<button type="submit" class="btn btn-primary" style="width: 55%;  background-color:#78a8b0; border-color:#10464f; margin-top: 10%;margin-left: 25%" ><b style="color: #10464f; font-size: 14px;">Retrieve Attendance</b></button>
+					</form>   
+					<form action="/viewinstitutecameras/{{user}}">
+						<button type="submit" class="btn btn-primary" style="width: 55%;  background-color:#78a8b0; border-color:#10464f; margin-top:8%;margin-left: 25%;" ><b style="color: #10464f; font-size: 14px;">View Cameras</b></button>
+					</form>
+					<form action="/viewcourses/{{user}}">
+						<button type="submit" class="btn btn-primary" style="width: 55%;  background-color:#78a8b0; border-color:#10464f; margin-top: 8%;margin-left: 25%; margin-bottom: 10%" ><b style="color: #10464f; font-size: 14px;">View Courses</b></button>
+					</form>                
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-2"></div>
+  </div>
+</div>
+</body>
+
+</html>

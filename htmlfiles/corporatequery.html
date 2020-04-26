@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+    <meta charset="utf-8">
+    <title>Query manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css?v=1.0">
+</head>
+
+<body style="height: 100%; width: 100%;background: url('../static/c22.jpg') no-repeat center top;">
+    <script src="../static/js/login.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <div class="container" style="height: 100%; width: 100%;">
+        <div class="row" style="height: 100%; width: 100%;">
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+
+                <div class="container" style="width:80% ;height: 95%;margin-top: 5%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
+                    <form action="/corporatequery/{{user}}" method="POST">
+                        <p style="text-align: center; color: #8c3a5c;"><b>QUERY MANAGER</b></p>
+                        <div class="form-group"  style="margin-top: 10%;">
+                            <label for="studentlistid" style="color: #8c3a5c;">Employees</label>
+                            <input type="text" class="form-control" id="employeelistid" placeholder="Employees" name="employeelist" value="ALL">
+                            <small id="studentHelp" class="form-text text-muted">Enter comma seperated list of employees (by default 'ALL')</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="startdateid" style="color: #8c3a5c;">Starting date</label>
+                            <input type="date" class="form-control" id="startdateid" placeholder="Starting date" name="start">
+                            <small id="startdateHelp" class="form-text text-muted">Starting date for attendance calculation</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="enddateid" style="color: #8c3a5c;">Ending date</label>
+                            <input type="date" class="form-control" id="enddateid" placeholder="Ending date" name="end">
+                            <small id="enddateHelp" class="form-text text-muted">Ending date for attendance calculation</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="efftime" style="color: #8c3a5c;">Effective time</label>
+                            <input type="text" class="form-control" id="efftime" placeholder="Effective time" name="efftime">
+                            <small id="courseHelp" class="form-text text-muted">Effective time (in hrs)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="hoursid" style="color: #8c3a5c;">Hours requirement</label>
+                            <input type="number" class="form-control" id="hoursid" placeholder="Hours requirement" name="hoursrequired" value="0">
+                            <small id="percentageHelp" class="form-text text-muted">Hours required <b style="color: black;">(if any)</b></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #8c3a5c;margin-top: 5%;border-color: #70153d; ">Query</button>
+                    </form>
+                </div>
+                {% with messages = get_flashed_messages() %}
+                        {% for message in messages %}
+                            {% if message %}
+                                {% if message == "incomplete" %}
+                                    <script>alert("Missing fields")</script>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+
+            </div>
+            <div class="col-sm-4" style="height: 100%;">
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
