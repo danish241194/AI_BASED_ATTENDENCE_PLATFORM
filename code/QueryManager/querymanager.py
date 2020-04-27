@@ -35,13 +35,13 @@ institute_attendance = {
 Example
 
 institute_attendance = {
-	"iiit": {
-		"SMAI": {
-			<datetime format>: {
+	"iiit_1": {
+		"cs105": {
+			"20-02-2020": {
 				"2018201073": 1,
 				"2018201070": 0
 			},
-			<datetime format>: {
+			"27-02-2020": {
 				"2018201070": 1,
 				"2018201073": 0
 			}
@@ -49,18 +49,21 @@ institute_attendance = {
 	}
 }
 '''
+
 @app.route('/health')
 def health():
     return {"res":"live"}
+
 REGISTRY_IP = None
 REGISTRY_PORT = None
 @app.route('/institute/add_attendance', methods=['GET', 'POST'])
 def add_attendance():
+
 	global institute_attendance,corporate_attendance
 	content = request.json
 
 	"""
-	content
+	content_dict
 	{
 		"institute_id": 1213,
 		"course": "cs123",
@@ -72,13 +75,11 @@ def add_attendance():
 		"date":"DD-MM-YYYY"
 	}
 	"""
- 
 
 	content_dict = content
 
 	ins_id = content_dict["institute_id"]
 	course = content_dict["course"]
-	#converting date into python module "datetime" format before storing
 	date = content_dict["date"]
 	student_attendance = content_dict["attendance"]
 
@@ -103,11 +104,11 @@ def show():
 @app.route('/institute/get_attendance', methods=['GET', 'POST'])
 def get_attendance():
 	global institute_attendance
-	content = request.json
+	content_dict = request.json
 	"""
 	input
 
-	content
+	content_dict
 	{
 
 		"institute_id":1213,
@@ -153,8 +154,7 @@ def get_attendance():
 	}
 	
 	"""
-	content_dict = content
-
+	
 	ins_id = content_dict["institute_id"]
 	course_list = content_dict["query"]["courses"]
 	student_list = content_dict["query"]["students"]
@@ -165,15 +165,17 @@ def get_attendance():
 	condition = content_dict["query"]["condition"]
 
 	if course_list[0] == "ALL":
+		#getting list of all courses for that institute
 		course_list = list(institute_attendance[ins_id])
 
 	output_dict = {}
 
 	if ins_id not in institute_attendance:
-		return json.dumps(output_dict)
+		#if institute not registered, return empty dictionary
+		return output_dict
 
 	if condition == None:
-		for course in course_list:
+		for course in course_list: 
 			if course in institute_attendance[ins_id]:
 				output_dict[course] = {}
 
@@ -291,9 +293,7 @@ def add_attendance_corporate():
 			duration_to_be_added = (out_time - last_in_time).seconds
 
 			corporate_attendance[corporate_id][date][emp]["duration"] += duration_to_be_added			
-	# data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
-	# res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
-	return {"Response":"OK"}
+		return {"Response":"OK"}
 
 
 
@@ -383,7 +383,10 @@ def get_attendance_corporate():
 	'''
 
 	output_dict = {}
-
+	
+	if corporate_id not in corporate_attendance:
+		return output_dict
+	
 	if condition is None:
 		date = start_date
 		while date <= end_date:
