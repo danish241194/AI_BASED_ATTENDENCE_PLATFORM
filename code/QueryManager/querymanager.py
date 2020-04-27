@@ -246,7 +246,7 @@ corporate_attendance = {
 def show_corp():
 	global corporate_attendance
 	print(corporate_attendance)
-	return {"Response":"OK"}
+	return corporate_attendance
 
 @app.route('/corporate/add_attendance', methods=['GET', 'POST'])
 def add_attendance_corporate():
@@ -267,6 +267,7 @@ def add_attendance_corporate():
 	corporate_id = content_dict["corporate_id"]
 	timestamp_type = content_dict["type"]
 	empid_list = content_dict["ids"]
+	print(empid_list)
 	date = content_dict["date"]
 	time = content_dict["time"]
 
@@ -293,7 +294,7 @@ def add_attendance_corporate():
 			duration_to_be_added = (out_time - last_in_time).seconds
 
 			corporate_attendance[corporate_id][date][emp]["duration"] += duration_to_be_added			
-		return {"Response":"OK"}
+	return {"Response":"OK"}
 
 
 
@@ -399,7 +400,6 @@ def get_attendance_corporate():
 				output_dict[date_in_str] = present_emp_list
 
 			date += datetime.timedelta(days=1)
-
 	else:
 		output_dict["ids"] = []
 		parameter = condition[list(condition)[0]]
@@ -449,14 +449,5 @@ if __name__ == "__main__":
 		print("NO previous Data")
 		pass
 
-	"""
-	REGISTRY_IP = args["registry_ip"]
-	REGISTRY_PORT = args["registry_port"]
 
-	res = requests.get('http://'+REGISTRY_IP+':'+str(REGISTRY_PORT)+'/fetch/query_manager')
-	data = res.json()
-	//inititalize you data
-	t1 = threading.Thread(target=data_dumping_service) 
-	t1.start()
-	"""
 	app.run(debug=True,host = "0.0.0.0",port=int(args["port"])) 
