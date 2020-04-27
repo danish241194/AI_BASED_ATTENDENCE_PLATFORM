@@ -1,97 +1,134 @@
-
-
-
-
-
-
-
-
-
-
-
-
 <!doctype html>
 
 <html lang="en" style="height: 100%; width: 100%;">
 <head>
-    <meta charset="utf-8">
-    <title>Home</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<meta charset="utf-8">
+	<title>Corporate Home</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<style type="text/css">
+		.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+			background-color:#fccfd7;
+			margin: 0%;
+			color:#70153d;
+		}
+		a {
+		color:#226b78;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			color:#226b78;
+			text-decoration: @link-hover-decoration;
+		}
+
+		&:focus {
+			.tab-focus();
+		}
+		}
+
+	.container {
+		width: 50%;
+	}
+
+		b{
+			font-size: 14px;
+		}
+
+	</style>
 </head>
 
-<body style="height: 100%; width: 100%;background-color:#f2f2f2 ;">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <div class="container" style="height: 100%; width: 100%;">
-        <div class="row" style="height: 100%; width: 100%;">
-            <div class="col-sm-4" style="height: 100%;">
+<body style="height: 100%; width: 100%; text-align:left; font-size:large; background: url('../static/c22.jpg') no-repeat ;background-attachment: fixed;
+  background-size: cover;">
+<div class="container" style=" width: 100%">
+	<div class="row">
+		<div class="col-sm-3"></div>
+		<div class="col-sm-6">
+			<ul class="nav nav-pills" style="padding:0%; margin-top: 5%; background-color:#faebee; border-radius: 8px;width: 100%;">
+				<li class="active" style="width: 22%;"><a data-toggle="pill" href="#add_emp" style="  text-align: center;"><b style="font-size: 14px">Add Employees</b></a></li>
+				<li style="width: 27%;"><a data-toggle="pill" href="#remove_emp" style="text-align: center;"><b style="font-size: 14px">Remove Employees</b></a></li>
+				<li style="width: 19%;"><a data-toggle="pill" href="#add_camera" style="  text-align: center;"><b style="font-size: 14px">Add Camera</b></a></li>
+				<li style="width: 15%;"><a data-toggle="pill" href="#queries" style=" text-align: center;"><b style="font-size: 14px">Queries</b></a></li>
+				<li style="width: 15%;"><a href="/" style=" text-align: center;"><b style="font-size: 14px">LogOut</b></a></li>
+			</ul>      	
+		</div>
+		<div class="col-sm-3"></div>
+	</div>
+</div>
+<div class="container" style="width: 100%">
+	<div class="row" style="height: 100%; width: 100%">
+			<div class="col-sm-2"></div>
+			<div class="col-sm-8 tab-content" style="height: 100%;">
+				<div id="add_emp" class=" tab-pane fade in active" style="height: 100%; background-color: transparent;padding:2%" >
+					<div class = "container"style=" width: 45%; height:100% ; box-shadow: 2px 2px 5px grey;  border-radius:8px; background-color:#faebee;">
 
-                
-                <div class="container" style="height:45%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
-                    <p style="text-align: center;"><b> Add employees</b></p>
-                    <form method="post" action="/addemployees/{{user}}" enctype="multipart/form-data">
-                        <div class="form-group" style="margin-top: 15%;">
-                            <p for="exampleFormControlFile1">Upload zip file</p>
-                            <input type="file" name ="file" class="form-control-file" id="customFile" aria-describedby="imagehelp" placeholder="Enter image">
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff; margin-top: 5%;" >Add</button>
-                    </form>    
-                </div>
 
-                
-            </div>
-            <div class="col-sm-4" style="height: 100%; ">
+					<form method="post" action="/addemployees/{{user}}" enctype="multipart/form-data">
+						<div class="form-group" style="margin-top: 15%;">
+							<p style="color:#226b78; margin-left: 1%" for="exampleFormControlFile1"><b>Upload zip file</b></p>
 
-                <div class="container" style="height:45%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
-                    <p style="text-align: center;"><b> Remove employees</b></p>
-                    <p style="text-align: center;margin-top: 15%;">comma seperated employee ids</p>
-                    <form action="/removestudents/{{user}}" method="POST">
-                        <div class="form-group" style="width: 75%; margin-left: 15%;">
-                            <input type="text" class="form-control" placeholder="Enter employee ids" id="remove_studentlist_id" name="removelist">
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" >Remove</button>
-                    </form>
-                </div>
-                
-                
+							<input type="file" name ="file" class="form-control-file" id="customFile" aria-describedby="imagehelp" placeholder="Enter image" style="color:#226b78; font-size: 14px; margin-top: 5%">
+							
+						</div>
+						<button type="submit" class="btn btn-primary" style="width: 30%;  float: right; background-color:#78a8b0; border-color:#10464f; margin-bottom: 5%; margin-top: 18%; margin-right: 8%" ><b style="color: #10464f; font-size: 14px;">Add</b></button>
+					</form>    
+					</div>
+				</div>
+				<div id="remove_emp" class="tab-pane fade" style="height: 100%; background-color: transparent;padding: 2%">
+					<div class="container" style="width:45%; height: 100%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee;">
+						<p style="text-align: center;color:#226b78; margin-top: 15%"><b>Comma seperated Employee ids</b></p>
+						<form action="/removeemployees/{{user}}" method="POST">
+							<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+								<input type="text" class="form-control" placeholder="Enter employee ids" id="remove_employeelist_id" name="removelist" style="width: 40%; margin-left: 0%">
+							</div>
+							<button type="submit" class="btn btn-primary" style="width: 30%; float: right; background-color: #78a8b0; border-color:#10464f; margin-top:18%;margin-right: 8%; margin-bottom: 5% ;color:#10464f ;font-size: 14px;" ><b>Remove</b></button>
+						</form>
+					</div>
+				</div>
 
-                <div class="container" style="height:40%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
-                    <p style="text-align: center; margin-top: 10%;"><a style=" color: #ff3333;" href="/cqm/{{user}}">Retrieve attendance (queries)</a></p>                
-                    <p style="text-align: center; margin-top: 10%;"><a style=" color: #ff3333;" href="/viewcorporatecameras/{{user}}">View cameras</a></p>                
-                    <div style="display: flex;  justify-content: center;">
-                        <form action="/startclicked/{{user}}" method="POST">
-                            <button type="submit" class="btn btn-primary" id="startbutton_id" style="float: center; background-color: #4d94ff;margin-top: 5%;">start</button>
-                        </form>
-                        
-                    </div>
-                    
-                </div>
 
-            </div>
-            <div class="col-sm-4" style="height: 100%; ">
+				<div id="add_camera" class="tab-pane fade" style="height: 100%;background-color: transparent;padding: 2%">
+				<div class="container" style="width: 45%; height: 100%;box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee">
 
-                <div class="container" style="height:45%;width:80% ;margin-top: 10%;  box-shadow: 2px 2px 5px grey;  border-radius: 8px;padding: 10%; background-color: #FFFFFF;">
-                    <p style="text-align: center;"><b> Add camera</b></p>
-                    <form action="/addcorporatecamera/{{user}}" method="POST">
-                        <div class="form-group" style="width: 75%; margin-left: 15%;margin-top: 15%;">
-                            <input type="text" class="form-control" placeholder="Gate " id="camera_gate_id" name="gate">
-                        </div>
-                        <div class="form-group" style="width: 75%; margin-left: 15%;">
-                            <input type="text" class="form-control" placeholder="Camera id" id="camera_id" name="camera">
-                        </div>
-                        <div class="form-group" style="width: 75%; margin-left: 15%;">
-                            <select class="form-control" id="type_id" name = "type">
-                                <option selected disabled ><p style="color: grey;">Camera type</p></option>
-                                <option value="IN" selected>IN</option>
-                                <option value="OUT">OUT</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="float: right; background-color: #4d94ff;margin-top: 5%;" >Add</button>
-                    </form>
-                </div>
 
-            </div>
-        </div>
-    </div>
+
+					<form action="/addcorporatecamera/{{user}}" method="POST">
+						<div class="form-group" style="width: 180%; margin-left: 15%;margin-top: 15%;">
+							<input type="text" class="form-control" placeholder="Gate " id="camera_gate_id" name="gate" style="width: 40%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+							<input type="text" class="form-control" placeholder="Camera id" id="camera_id" name="camera" style="width: 40%">
+						</div>
+						<div class="form-group" style="width: 180%; margin-left: 15%; margin-top: 5%">
+							<select class="form-control" id="type_id" name = "type" style="width: 40%">
+								<option selected disabled ><p style="color: #10464f;">Camera type</p></option>
+								<option value="IN" selected>IN</option>
+								<option value="OUT">OUT</option>
+							</select>
+						</div>
+						<button type="submit" class="btn btn-primary" style="width:30%; float: right; background-color: #78a8b0; border-color: #10464f; margin-top: 15%; margin-right: 8%; margin-bottom: 5%;color: #10464f" ><b style="font-size: 14px">Add</b></button>
+					</form>
+				</div>
+				</div>
+				<div id="queries" class="tab-pane fade" style="height: 100%;background-color: transparent;padding: 2%;">
+					<div class="container" style="width: 45%; height: 100%;box-shadow: 2px 2px 5px grey;  border-radius: 8px; background-color:#faebee">
+					<form action="/cqm/{{user}}">
+						<button type="submit" class="btn btn-primary" style="width: 55%;  background-color:#78a8b0; border-color:#10464f; margin-top: 10%;margin-left: 25%" ><b style="color: #10464f; font-size: 14px;">Retrieve Attendance</b></button>
+					</form>   
+					<form action="/viewcorporatecameras/{{user}}">
+						<button type="submit" class="btn btn-primary" style="width: 55%;  background-color:#78a8b0; border-color:#10464f; margin-top:8%;margin-left: 25%;" ><b style="color: #10464f; font-size: 14px;">View Cameras</b></button>
+					</form>
+					<form action="/startclicked/{{user}}" method="POST">
+						<button type="submit" id="startbutton_id" class="btn btn-primary" style="width: 55%;  background-color:#78a8b0; border-color:#10464f; margin-top: 8%;margin-left: 25%; margin-bottom: 10%" ><b style="color: #10464f; font-size: 14px;">Start</b></button>
+					</form>									   
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-2"></div>
+  </div>
+</div>
                     {% with messages = get_flashed_messages() %}
                         {% for message in messages %}
                             {% if message %}
@@ -118,20 +155,6 @@
                         document.getElementById("startbutton_id").style.visibility = "hidden"
                         </script>
                     {% endif %}
-    
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-                

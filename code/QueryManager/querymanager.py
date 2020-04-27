@@ -88,8 +88,8 @@ def add_attendance():
 		institute_attendance[ins_id][course] = {}
 	institute_attendance[ins_id][course][date] = student_attendance 
 
-	data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
-	res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
+	# data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
+	# res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
 
 	return {"Response":"OK"}
 
@@ -291,8 +291,8 @@ def add_attendance_corporate():
 			duration_to_be_added = (out_time - last_in_time).seconds
 
 			corporate_attendance[corporate_id][date][emp]["duration"] += duration_to_be_added			
-	data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
-	res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
+	# data = {"institute_attendance":institute_attendance,"corporate_attendance":corporate_attendance}
+	# res = requests.post('http://172.17.0.1:5533/store/query_manager', json=data)
 	return {"Response":"OK"}
 
 

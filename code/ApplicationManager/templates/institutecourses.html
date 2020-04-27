@@ -7,18 +7,36 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 <style>
-tr {text-align: center;}
-table {margin: 10px;background-color:#FFFFFF;}
+    table, td, th {  
+      border: 1px solid #70153d;
+      text-align: left;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10px;
+      background-color:#faebee;
+    }
+    
+    th, td {
+      padding: 15px;
+      text-align: center;
+    }
+    tr {text-align: center;}
+    
 </style>
 
 <body style="height: 100%; width: 100%;background-color:#f2f2f2 ;">
-    <script src="../static/js/institutecourses.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <h3 style="text-align: center; margin-top: 3%; color: #70153d;">COURSE LIST</h3>
     <div class="container" style="height: 100%; width: 100%;">
         <div class="row" style="height: 100%; width: 100%;">
-            <div class="col-sm-12" style="height: 100%;">
+            <div class="col-sm-2" style="height: 100%;">   
+            </div>
+            <div class="col-sm-8" style="height: 100%;margin-top: 2%;">
                 <table class="table table-striped" id="coursetable_id">
-                    <thead>
+                    <thead style="color: #f54c6b;">
                       <tr>
                         <th style="width: 20%; text-align: center;">Course</th>
                         <th style="width: 20%; text-align: center">Room</th>
@@ -27,7 +45,7 @@ table {margin: 10px;background-color:#FFFFFF;}
                         <th style="width: 20%; text-align: center">Attendance duration</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="background-color:#faebee ;">
                         {% for key, value in data.items() %}
                             <!-- {{ key }} : {{ value }} -->
                             {% for each in value %}
@@ -37,19 +55,12 @@ table {margin: 10px;background-color:#FFFFFF;}
                                 {% endfor %}</tr>        
                             {% endfor %}
                         {% endfor %}
-
-
-                
-
-
-
                     </tbody>
                 </table>
             </div>
-            <div class="col-sm-0" style="height: 100%;">   
+            <div class="col-sm-2" style="height: 100%;">   
             </div>
-            <div class="col-sm-0" style="height: 100%;">   
-            </div>
+
         </div>
     </div>
     

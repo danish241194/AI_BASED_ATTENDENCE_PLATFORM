@@ -17,6 +17,7 @@ service_ip_mapping['Query Manager'] = '172.17.0.3'
 service_ip_mapping['Sensor Manager'] = '172.17.0.1'
 service_ip_mapping['Scheduler'] = '172.17.0.1'
 service_ip_mapping['Registry'] = '172.17.0.1'
+service_ip_mapping['Registry-Backup'] = '172.17.0.1'
 
 
 
@@ -28,6 +29,8 @@ service_port_mapping['Query Manager'] = 9874
 service_port_mapping['Sensor Manager'] = 5004
 service_port_mapping['Scheduler'] = 8899
 service_port_mapping['Registry'] = 5533
+service_port_mapping['Registry-Backup'] = 5544
+
 health_status = {}
 def mycopy(ftp_client,source,target):
 		
@@ -160,6 +163,8 @@ def draw_details():
 
 	TABLE_ = [['SERVICE Name', 'IP','PORT','STATUS']]
 	for key in health_status.keys():
+		if(health_status[key][0]=="Registry-Backup"):
+			health_status[key][1] = '172.17.0.4'
 		TABLE_.append(health_status[key])
 	t = Texttable()
 	t.add_rows(TABLE_)
@@ -198,10 +203,12 @@ def draw_details():
 		t = Texttable()
 		t.add_rows(details)
 		print(t.draw())
+
 def thread_start_new(name):
 	time.sleep(3)
 	res = requests.get("http://172.17.0.2:5993/run_service/"+name)
 	service_ip_mapping[name] = (res.json())["ip"]
+
 
 def health_individual(name,ip,port):
 	global health_status
@@ -216,14 +223,11 @@ def health_individual(name,ip,port):
 		thread.start()
 
 
-
-
 def health_manager():
 	global health_status
 
 
-
-	services = ['Scheduler','Application Manager','Query Manager','Server LCM','Deployment Manager','Sensor Manager','Service LCM','Registry']
+	services = ['Scheduler','Application Manager','Query Manager','Server LCM','Deployment Manager','Sensor Manager','Service LCM','Registry','Registry-Backup']
 	while True:	
 		time.sleep(5)
 		for service in services:

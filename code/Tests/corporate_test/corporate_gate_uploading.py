@@ -14,7 +14,7 @@ def upload_image(img):
 		print(req.json())
 	return
 
-list_=['s1.jpg','s1.jpg','s1.jpg','s1.jpg','s1.jpg','j1.png','j1.png','j1.png','j1.png','a1.jpg','a1.jpg','a1.jpg','a1.jpg','a1.jpg']
+list_=['s1.jpg','s1.jpg','s1.jpg','j1.png','j1.png','a1.jpg','a1.jpg','a1.jpg']
 i=0
 for frame in list_:
 	upload_image(frame)

@@ -30,7 +30,12 @@ def store(service):
 		f = open(registry_path,"wb")
 		data = {"nothingadasd":"nothingxxsdsd"}
 		f.write(pickle.dumps(data))
+		f.close()
 
+		server_loc = "registry_data/server_loc.pickle"
+		f = open(server_loc,"wb")
+		data = {"nothingadasd":"nothingxxsdsd"}
+		f.write(pickle.dumps(data))
 		f.close()
 
 
@@ -79,15 +84,59 @@ def fetch(service):
 servloc_dict = dict()
 @app.route('/show')
 def show():
+	server_loc = "registry_data/server_loc.pickle"
+
+	servloc_dict = pickle.loads(open(server_loc,"rb").read())
+
 	return servloc_dict
+
 @app.route('/service_entry', methods=['GET', 'POST'])
 def service_entry():
 	global servloc_dict
 	content = request.json
-	print("+ REQUEST TO ENTER ADDRESS OF ",content["servicename"])
+
+
+
+	registry_path = "registry_data/registry.pickle"
+
+	server_loc = "registry_data/server_loc.pickle"
+
+	my_file = Path("registry_data")
+	if not my_file.is_dir():
+		os.system("mkdir registry_data")
+		
+		f = open(server_loc,"wb")
+		data = {"nothingadasd":"nothingxxsdsd"}
+		f.write(pickle.dumps(data))
+		f.close()
+
+		f = open(registry_path,"wb")
+		data = {"nothingadasd":"nothingxxsdsd"}
+		f.write(pickle.dumps(data))
+		f.close()
+
+
+	# try:
+	servloc_dict = pickle.loads(open(server_loc,"rb").read())
 
 	servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] }
-	print("\t- ",content["servicename"])
+    # print(data)
+
+	f = open(server_loc,"wb")
+	f.write(pickle.dumps(servloc_dict))
+	f.close()
+
+
+
+
+
+
+
+	# print("+ REQUEST TO ENTER ADDRESS OF ",content["servicename"])
+
+	# servloc_dict[content["servicename"]] = { "ip":content["ip"] , "port":content["port"] }
+	# print("\t- ",content["servicename"])
+
 
 	'''
     	{
@@ -101,6 +150,7 @@ def service_entry():
 
     	}
 	'''
+
 	'''
     	which service is running at which location
 	'''
@@ -110,6 +160,7 @@ def service_entry():
 	print("+ RETURNING RESPONSE OK")
 
 	return {"Response":"OK/ERROR"}
+
 
 @app.route('/get_service_location/<service>')
 def get_service_location(service):
@@ -129,11 +180,23 @@ def get_service_location(service):
 		
 		}
 	'''
+
+
 	try:
-		print("+ RETURNING ADDRESS",servloc_dict[service])
+		server_loc = "registry_data/server_loc.pickle"
+
+		servloc_dict = pickle.loads(open(server_loc,"rb").read())
+
 		return servloc_dict[service]
+
 	except:
-		return {"res":"ERROR"}
+		return {"res":"error"}
+
+	# try:
+	# 	print("+ RETURNING ADDRESS",servloc_dict[service])
+	# 	return servloc_dict[service]
+	# except:
+	# 	return {"res":"ERROR"}
     
 	'''
     	free_list = [{"ip":ip,"port":port"username":username,"password":password},
@@ -142,11 +205,6 @@ def get_service_location(service):
 	'''
 
     # return {"res":"OK","free_list":free_list} or {"res":"NO_MACHINE_AVAILABLE"}
-
-
-    
-
-
 
 if __name__ == "__main__": 
 	ap = argparse.ArgumentParser()
